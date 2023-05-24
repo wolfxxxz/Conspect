@@ -16,13 +16,14 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo curl -L "https://github.com/docker/compose/releases/download/2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 --и тут лажа
-## 3 Commands simple
+docker-compose --version
+## 2 Commands simple container, image, volume --help
 docker -v - version docker
 docker --help
 docker container --help
 docker image --help
 docker volume --help
-## 4 container
+## 3 container
 ```
 docker container --help
 docker run --help
@@ -48,8 +49,7 @@ Share images, automate workflows, and more with a free Docker ID:
 For more examples and ideas, visit:
  https://docs.docker.com/get-started/
 ```
-## 5 docker run and exit вход и выход из контейнера
-### docker pull
+## 4 docker pull
 sudo docker pull ubuntu - скачать образ ubuntu последней версии
 [sudo] пароль для mvmir: 
 Using default tag: latest
@@ -58,11 +58,18 @@ dbf6a9befcde: Pull complete
 Digest: sha256:dfd64a3b4296d8c9b62aa3309984f8620b98d87e47492599ee20739e8eb54fbf
 Status: Downloaded newer image for ubuntu:latest
 docker.io/library/ubuntu:latest
-### sudo docker run -i -t ubuntu bash
-sudo docker run -i -t ubuntu bash - <docker run> - запустить контейнер, <-i> -вывести всё из контейнера <-t> - принимать все комманты в контейнер <ubuntu> - контейнер, <bash> - программа из контейнера (bash запустится как дефолтная комманда)
-root@9519bd31f6cc:/#  - теперь мы внутри контейнера
-### exit - выйти из ...
-## 6 ls, ls -a, rm
+## 5 docker run and exit вход и выход из контейнера
+```
+sudo docker run -i -t ubuntu bash
+ <docker run> - запустить контейнер,
+  <-i> -вывести всё из контейнера 
+  <-t> - принимать все комманты в контейнер 
+  <ubuntu> - контейнер, 
+  <bash> - программа из контейнера (bash запустится как дефолтная комманда)
+ root@9519bd31f6cc:/#  - теперь мы внутри контейнера
+```
+### exit - выйти из контейнера
+## 6 container ls, ls -a, rm
 ### docker container ls
 sudo docker container ls - show working containers
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
@@ -78,7 +85,7 @@ delete container
 восстановить контейнер невозможно - удалять нужно осторожно
 sudo docker container rm 83e9dccbe66f
 sudo docker container rm admiring_brahmagupta
-## 7 фоновый запуск и остановка, удаление всех остановленных контейнеров
+## 7 фоновый режим -d, attach, <ctrl + p> -> <ctrl + q>, stop, prune -f
 ### -d - фоновый режим
 sudo docker run -it -d ubuntu bash
 ### attach - зайти в фоновый контейнер
@@ -116,9 +123,8 @@ sudo docker run -it --name ubuntu_1 --rm ubuntu bash
     Deleted Containers:
     63f55b7f6553089ad3ec524bc80a7dfd4d0fa06f66d29fde5631936dc1a00ce4
     Total reclaimed space: 67B
-13: 
 ## 10 bind Как обмениватся файлами пк с контейнером
-По сути с помощью bint контейнер получает доступ к папке на диске пк
+По сути с помощью bind контейнер получает доступ к папке на диске пк
 *** sudo docker run -it --mount type=bind,src=/home/mvmir/LearnQA_Docker/LearnQA_Docker/dir_for_bind,target=/bind/ ubuntu bash**
 1: <sudo docker run -it>
 2: <--mount>
@@ -158,7 +164,7 @@ sudo docker pull python - скачать контейнер с пайтон
 5: Запускаем программу с помощью контейнера с python
 ***sudo docker run --rm --mount type=volume,src=python_program,target=/src/,readonly python python /src/counter.py**
 1 2 3 4 5 
-## 13 образы разных версий программ
+## 13 образы разных версий программ Python + bind
 1: Тестим код пайтона
 sudo docker run --rm --mount trc=/home/mvmir/LearnQA_Docker/LearnQA_Docker/dir_for_bind,target=/bind/,readonly python python /bind/test_version.py
 [sudo] пароль для mvmir: - ебаная шляпа
@@ -218,11 +224,67 @@ python            3.5       3687eb5ea744   2 years ago      871MB
 6: Запускаем наш new image
 sudo docker run -it --rm ubuntu_with_vim
 vim test.txt
-## 16 
+## 16 Подмена команды -w
+sudo docker run -it ubuntu_slovarnv pwd
+sudo docker ps -a == sudo docker container ls -a
+sudo docker commit 358dc049953e ubuntu_start_with_pwd
+sudo docker image ls
+### -w /usr/bin (перейти в директорию /usr/bin)
+**-w == cd**
+docker run -it -w /usr/bin ubuntu pwd
+docker container prune -f
+docker run -it -w /SlovarNV ubuntu_slovarnv
+#### из этого тоже можно сделать образ
+docker ps -a 
+docker commit 00b128c80f89 ub_slovar_cd_slovar
+docker image ls
+## 17 Docker hub
+1: registration
+https://hub.docker.com/repositories/wolfxxxz
+2: docker login
+bash: docker login
+wolfxxxz
+password
+________
+## 18 pull image
+1: Название(tag) должно начинатся с wolfxxxz/
+docker image ls
+REPOSITORY                 TAG       IMAGE ID       CREATED       SIZE
+ubuntu_slovarnv            latest    e6bca9f7eac9   5 hours ago   366MB
+2: Переименовать образ (image)
+docker tag ubuntu_slovarnv wolfxxxz/ubuntu_slovarnv
+docker image ls
+REPOSITORY                 TAG       IMAGE ID       CREATED       SIZE
+ubuntu_slovarnv            latest    e6bca9f7eac9   5 hours ago   366MB
+wolfxxxz/ubuntu_slovarnv   latest    e6bca9f7eac9   5 hours ago   366MB
+3: delete old image
+docker image rm ubuntu_slovarnv
+Untagged: ubuntu_slovarnv:latest
+docker image ls
+REPOSITORY                 TAG       IMAGE ID       CREATED       SIZE
+wolfxxxz/ubuntu_slovarnv   latest    e6bca9f7eac9   5 hours ago   366MB
+4: push image
+docker push wolfxxxz/ubuntu_slovarnv
+https://hub.docker.com/repositories/wolfxxxz
+# test
+## 1 
 
 
 
-## Пропали заметки
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Пропали заметки
 2: Настроить нужный софт (в нашем случае vim)
 apt-get update
 apt-get install apt-file
@@ -230,3 +292,94 @@ apt-file update
 apt-get install vim
 echo hello vim > test.txt
 vim test.txt
+##
+
+# Docker command
+sudo apt install docker.io
+docker --version
+sudo docker ps
+## Container
+sudo docker container start ubuntu
+sudo docker container attach ubuntu
+sudo docker container attach eeebb78bda74 **Войти в фоновый режим**
+sudo docker container stop eeebb78bda74 **Stop**
+sudo docker container ls
+sudo docker container ls -a == docker ps -a
+sudo docker container rm 83e9dccbe66f
+sudo docker container prune
+sudo docker container prune -f **можно не спрашивать об удалении**
+## Image
+sudo docker pull ubuntu
+sudo docker image ls
+sudo docker image rm b6f507652425
+sudo docker commit 59f77556abfc ubuntu_with_vim **Создать образ**
+sudo docker run -it -d ubuntu bash **Фоновый режим**
+sudo docker run hello-world
+sudo docker run -i -t ubuntu bash
+sudo docker run -it --name ubuntu_1 --rm ubuntu bash
+
+# Состояния контейнера
+## Режим интерактивного терминала (Interactive Mode)
+docker run -it <образ>
+## Режим запуска контейнера в фоне (Detached Mode)
+docker run -d <образ>
+## Режим приостановки контейнера (Paused Mode):
+docker pause <контейнер>
+docker unpause <контейнер>
+## Режим остановки контейнера (Stopped Mode)
+docker stop <контейнер>
+docker rm <контейнер>
+
+
+# Практика 
+## Зайти в остановленный контейнер
+### Проверить образы
+sudo docker image ls
+### Запустить образ
+sudo docker run -it ubuntu_with_vim
+echo append_name >> test.txt
+### Выход
+exit
+### Проверяем остановленные контейнеры
+sudo docker container ls -a
+CONTAINER ID   IMAGE             COMMAND   CREATED         STATUS                          PORTS     NAMES
+c9caac98309a   ubuntu_with_vim   "bash"    3 minutes ago   Exited (0) About a minute ago             recursing_northcutt
+### Зайти в остановленный контейнер
+sudo docker container start c9caac98309a
+sudo docker container attach c9caac98309a
+cat test.txt
+hello vim
+append_name
+### Выйти и очистить
+exit
+sudo docker container prune -f
+## Создать новый образ через commit
+### Запустить образ
+sudo docker image ls
+sudo docker run -it ubuntu_with_vim
+### Установить nano
+apt-get install nano
+### Создать commit
+sudo docker ps -a
+sudo docker commit 8b58552f5c0e ubuntu_vim_nano
+sudo docker image ls
+### Запустить новый образ
+sudo docker run -it ubuntu_vim_nano
+nano test.txt
+### Удалить старый образ не получится:) Слои
+## Запустить SlovarNV на docker
+sudo docker run -it --mount type=bind,src=/home/mvmir/SlovarNV,target=/bind/ ubuntu bash
+### Copy everithing from bind in SlovarNV
+cp -vR bind/. SlovarNV
+### Commit
+sudo docker commit fbcb61811c79 ubuntu_slovarnv
+sudo docker container rm fbcb61811c79
+sudo docker run -it --rm ubuntu_slovarnv
+exit
+## Подмена команды -w
+docker run -it -w /SlovarNV/ ubuntu_slovarnv
+exit
+docker ps -a
+docker commit b683e0f2d89f ub_slov_cd
+docker run -it ub_slov_cd
+##

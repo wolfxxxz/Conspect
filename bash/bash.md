@@ -1,3 +1,4 @@
+# Основы
 ## 1 pwd, cd
 ### pwd print working directory
 pwd    - где я нахожусь // /home/mvmir
@@ -82,6 +83,7 @@ cp -vR test4 copyTest  - копирует всё содержимое -R и по
 'test4' -> 'copyTest'
 'test4/test5' -> 'copyTest/test5'
 'test4/test.txt' -> 'copyTest/test.txt'
+cp -vR bind/. SlovarNV - копировать всё содержимое папки bind в папку SlovarNV
 ## 7 df (inot), ln (LINK)
 ### df - display free disk space
 man df
@@ -104,7 +106,7 @@ cat output.txt - запись по ссылке попадёт в файл
 Hello
 how are you
 ln -s ~/go/src/github.com/Wolfxxxz/ Link_Wolfxxxz
-## 8 Просмотр содержимого cat & less & wc & nl & head & tail
+## 8 Просмотр содержимого cat & less & wc & nl & head & tail & ll
 ### cat - показать файл
 cat <file.txt> - посмотреть файл
 cat <file.txt> <file2.txt> - смотреть прям два файла одновременно
@@ -574,7 +576,564 @@ mvmir@mvmir-Lenovo-ideapad-320-15IKB:~/go/src/github.com/Wolfxxxz$
 2. Запись алиаса в bashrc
 echo "alias goWolfxxxz='cd ~/go/src/github.com/Wolfxxxz'" >> ~/.bashrc
 source ~/.bashrc  -- обновить bashrc
-## 23 history
+# 4 shell and bash Удалённое подключение TCP/IP (ssh, scp, sftp,...)
+## 23 Установка удалённого контейнера docker
+### /ubuntu-ssh/
+#### Dockerfile
+```
+FROM ubuntu:latest
+
+##########################################################
+# Install openssh-server
+RUN apt update && apt install openssh-server sudo -y
+
+##########################################################
+# Create a group “dmdev”
+RUN groupadd dmdev
+
+##########################################################
+# Create a user “ivan”
+RUN useradd -d /home/ivan -m -s /bin/bash -g dmdev ivan
+# Set default password 123 for user ivan
+RUN echo "123\n123" | passwd ivan
+
+##########################################################
+# Create a user “denis”
+RUN useradd -d /home/denis -m -s /bin/bash -g dmdev denis
+# Create .ssh directory in denis home directory
+RUN mkdir -p /home/denis/.ssh
+# Copy the ssh public key in the authorized_keys file.
+# The id_rsa.pub below is a public key file you get from ssh-keygen.
+# They are under ~/.ssh directory by default.
+COPY id_rsa.pub /home/denis/.ssh/authorized_keys
+# change ownership of the key file.
+RUN chown denis /home/denis/.ssh/authorized_keys && chgrp dmdev /home/denis/.ssh/authorized_keys && chmod 640 /home/denis/.ssh/authorized_keys
+
+##########################################################
+# Start SSH service
+RUN service ssh start
+# Expose docker port 22
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+```
+#### id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDhcwGAxO3u6Exmg63cLjmYAvWD4PSDOjq+vpgCvKc1gE2ZO469GITPiVbquwh4H4lBkylCuMUzDRFj1N/ZYbsccTGMQRUpIZ0ERdlX3V7sVjWIZbKO0AMZKPkRLWy/P2BXNlpl0EIndW1Fyg6ware7cuATsKzhApD0j8uhQhl+kbBLSZnuJgTrwWeCmX2+KHPiWm+NA4T/dZJRiWXXeIFMk7OmOnMMHPirbwwzlwuiEY7PV4/Sj3P99RpyBo2XjjfMZ7xQdm0tC5wk5XOK28R4JhhevpbJbSgKS9/fCOrDMHLSBu0YNW1Q73pD/RHjVO2StsKKTjNseFuTA54/bDBCM4tKh6jepcyJlo82whD6/ufCoek5690Eao2A+PTujaEwMX5Xn7R5yV80rYJjrWU3L/DUld8huXyG0twJMU7rz3PwGnXbRCHYOpKMfLmBQxuqBYeLhccDuAvyUDn4MvDI9UIQgbml2j+S47df0rNoRlFqJO9wgM3EkrYrnZAfbck= dmatveyenka@Dzianiss-MacBook-Pro-2.local
+### docker build -t ubuntu-ssh . 
+### docker run -d -p 2022:22 ubuntu-ssh
+### ssh -p 2022 ivan@localhost
+<ssh -p 2022> порт 2022
+<ivan@localhost> name 
+
+### password 123
+### exit
+### запрос без захода на сервер
+ssh -p 2022 ivan@localhost "ls -a"
+ivan@localhost's password: 
+.
+..
+.bash_history
+.bash_logout
+.bashrc
+.cache
+.profile
+## 24 Public key auth
+Есть пара ключей один из которых хранится на своеё машине а второй в строчке файла на сервере
+### privat key - хранится на своей машине
+Где хранится ключ? 
+ls ~/.ssh
+### public key - лежит на удалённой машине
+Где хранится ключ на сервере ?
+~/.ssh/authorized_keys
+### Где взять ключи?
+ssh-keygen
+Генерирует пару ключей в папку по умолчанию ~/.ssh
+### У меня они уже есть
+cat ~/.ssh/id_ed25519.pub
+### Заменяю в папке /ubuntu-ssh/ содержимое публичного ключа
+ls ~/.ssh
+id_rsa.pub
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOBJCn775RhckiyQs6MRWqYMg5SSf4BqjhpmZGFbEo8 wolfxxxz@gmail.com
+### docker build -t ubuntu-ssh .
+### docker run -d -p 2022:22 ubuntu-ssh
+# 5 bash scripting
+## 27 bash script (.sh) или без разширения (best practice)
+### first script
+touch start-app
+nano start-app
+#!/bin/bash   - комментарий
+echo "Application is starting..." - комманда
+source start-app  - запустить скрипт
+ Application is starting...
+ ```
+ chmod +x start-app  - ченж мод для всех в start-app
+ chmod - это команда для изменения прав доступа.
+ +x - это опция, которая добавляет право на выполнение (исполнение) для файла.
+```
+Теперь можно запускать скрипт как приложение
+./start-app
+ Application is starting...
+export PATH=$PATH:$PWD
+ добавляем в path текущую дерикторию
+ теперь из любого места на пк можно вызвать этот скрипт
+start-app
+ Application is starting...
+если хочется запускать всегда то нужно добавить  PATH=$PATH:$PWD в .bashrc или в path
+### second script
+#### start_app
+```
+#!/bin/bash
+
+echo "Application is starting..."
+# Переменная default_app_name
+default_app_name="Spring"
+# принято все переменные оборачивать в {}
+# Интерполяция переменных (канкатенация)
+echo "Application name is ${default_app_name}!"
+# Неявные переменные
+# Строки "I am string"
+# Числа
+value=25
+# Массивы
+array=(1 5 22 190 1240 2050)
+# Вывести весь массив @
+echo "${array[@]}"
+# Вывести третий елемент массива
+echo "${array[2]}"
+echo "${array[@]}"
+# Узнать размер массива #
+echo "${#array[@]}"
+# Изменить значение в массиве 
+array[2]=222
+echo "${array[@]}"
+# Добавить елементы в массив
+array+=(10999 34)
+echo "${array[@]}"
+# Scan
+echo "Enter application name"
+read app_name
+echo "New application name is ${app_name}!"
+```
+#### bash
+start-app
+ Application is starting...
+ Application name is Spring!
+ 1 5 22 190 1240 2050
+ 22
+ 1 5 22 190 1240 2050
+ 6
+ 1 5 222 190 1240 2050
+ 1 5 222 190 1240 2050 10999 34
+ Enter application name
+ second app
+ New application name is second app!
+## 28 Основы bash script (shell expansions)
+### Brace expansions          -> {x...y} {a,b,c}
+#### {x..y}
+ll
+ итого 8
+ drwxrwxr-x  2 mvmir mvmir 4096 мая 23 16:47 ./
+ drwxr-xr-x 37 mvmir mvmir 4096 мая 23 16:47 ../
+ -rw-rw-r--  1 mvmir mvmir    0 мая 23 16:47 file1
+ -rw-rw-r--  1 mvmir mvmir    0 мая 23 16:47 file2
+ -rw-rw-r--  1 mvmir mvmir    0 мая 23 16:47 file3
+ -rw-rw-r--  1 mvmir mvmir    0 мая 23 16:47 file4
+ll file{1..4}
+-rw-rw-r-- 1 mvmir mvmir 0 мая 23 16:47 file1
+-rw-rw-r-- 1 mvmir mvmir 0 мая 23 16:47 file2
+-rw-rw-r-- 1 mvmir mvmir 0 мая 23 16:47 file3
+-rw-rw-r-- 1 mvmir mvmir 0 мая 23 16:47 file4
+#### range{x..y}
+echo {a..d}
+a b c d
+#### {a,b,c}
+rm file{1,2,4,5}
+ll
+ итого 8
+ drwxrwxr-x  2 mvmir mvmir 4096 мая 23 17:02 ./
+ drwxr-xr-x 37 mvmir mvmir 4096 мая 23 16:47 ../
+ -rw-rw-r--  1 mvmir mvmir    0 мая 23 16:47 file3
+### Tilde expansions          ->  ... $HOME
+var=~/foo
+echo ${var}
+ /home/mvmir/foo
+### Parameter & variable expansions ->  $var ${var} ${var:=default}
+#### переменные всегда в скобках
+echo $varb lac k/l ist
+ lac k/l ist
+echo ${var}/black/list
+ /home/mvmir/foo/black/list
+#### дефолт значения
+value=
+echo "${value}"
+Если value пустое то вывести 45
+echo "${value:=45}"
+45
+value=24
+echo "${value:=45}"
+24
+### Command substitution      -> $(command) `command`
+echo "The first file in directory ${PWD} is $(ls | head -n1)"
+The first file in directory /home/mvmir/lek28 is bestFile
+### Arithmetic expansion      -> $((expression))
+типа калькулятор
+echo "$(( 5 * 3 / 7 ))"
+2
+echo "$(( (5 **2 + 3) / 7 ))"
+4
+### Filename expansion        -> * ? [..]
+ls log* - <*> - любые символы
+loga  logb  logroisdos
+ls log? - только один символ
+loga  logb
+ls log[b,r] - только один символ из []
+logb
+### Word splitting            -> <space><tab><newline>
+разбивает строку на пробелы - всячески избегать
+## 29 bool
+### logic $?
+0 - true
+!=0 - false
+$? - show bool
+cat start-app  - существующий файл
+echo $?
+ 0
+cat start-app2  - не существующий
+ cat: start-app2: Нет такого файла или каталога
+echo $?
+ 1
+cat start-app | grep 1240
+ array=(1 5 22 190 1240 2050)
+echo $?
+ 0
+### use logic <test>
+#### man test > <
+test 10 -lt 5 - <-lt> == 10 < 5
+echo $?
+ 1
+#### -f (file)
+test -f Dockerfile - <-f> - есть такой файл в папке?
+echo $?
+ 1
+[[ -f new.file ]]  - тоже самое - другой синтаксис
+echo $?
+ 0
+#### -d (folder)
+test -d newFolder  - <-d> - для папок
+echo $?
+ 0
+[[ -d newFolder ]]  - тоже самое - другой синтаксис
+echo $?
+ 0
+#### (( char ))
+(( 10 > 5 * 3 ))
+echo $?
+ 1
+## 30 if else and case
+### elif
+value=0
+if (( value > 0 )); then
+	echo "${value} is positive"
+`# elif == else if`
+elif (( value < 0 )); then
+	echo "${value} is negative"
+else
+	echo "${value} is zero"
+fi
+### switch case
+echo "Hello bash switch case"
+echo "Enter any program:"
+read program
+case "${program}" in
+clean)
+	echo "Clean is invoked"
+	;;
+build)
+	echo "Build is invoked"
+	;;
+*)
+	echo "${program} is not supported by this application"
+	exit 2
+	;;
+esac
+## 31 циклы
+### while
+counter=10
+while (( counter > 0 )); do
+	echo "Counter value: ${counter}"
+	(( counter-- ))
+done
+### until (перевёрнутый while) <=
+counter=10
+until (( counter <= 0 )); do
+	echo "Counter value: ${counter}"
+	(( counter-- ))
+done
+### for
+```
+array=(5 90 83 23 67)
+for (( i = 0; i < "${#array[@]}"; i++ )); do
+   echo "Index value: ${i}. Array value: ${array[i]}"
+done
+```
+### for each
+```
+array=(5 90 83 23 67)
+for value in {1..5}; do
+   echo "For each loop: ${value}"
+done
+--------------
+array=(5 90 83 23 67)
+for value in "${array[@]}"; do
+   echo "For each loop: ${value}"
+done
+### for + if
+files=(loga logb logc new.file)
+for file in "${files[@]}"; do
+	if [[ -f "${file}" ]]; then
+		ls -l "${file}"
+	else
+	    echo "File doesn't exist: ${file}"
+	fi
+done
+-----------------
+files=(loga logb logc new.file)
+for file in "${files[@]}"; do
+	if [[ -f "${file}" ]]; then
+		ls -l "${file}"
+	else
+		echo "File doesn't exist: ${file}"
+		echo "Do you want to create ${file}? y/n"
+		read createFileAnswer
+		if [[ "${createFileAnswer}" = "y" ]]; then
+			touch "${file}"
+		fi
+	fi
+done
+```
+### for Word splitting
+for key in ~/keys/id_rsa* ; do
+    echo "Key file: ${key}"
+    cat "${key}"
+done
+## 32 func
+### Примичания
+1. Функцию можно вызвать после обьявления (порядок имеет значение)
+2. Входящие переменные нельзя обьявить в функции
+3. При обьявлении функции можно не писать function hello(){}, hello() {}
+4. Все переменные которые находятся в скрипте (вне зависимости от того где они находятся(внутри функции или цикла)) **ДОСТУПНЫ ДЛЯ ВСЕГО СКРИПТА** == **переменные лучше обьявлять local**
+5. return может вернуть только bool статус код $?
+### Устаревший способ
+function make() {
+  ...
+}
+### Рабочий способ
+**file:func**
+
+echo "Script all arguments $*"
+
+clean() {
+	echo "going to clean directory..."
+	echo "Function first argument $1" # первый входящий аргумент
+	echo "Function all arguments $@" # аргументы разделены
+	echo "Function all arguments $*" # все аргументы как строка
+	index=0
+	for arg in "$@" ; do 
+		echo "Index: ${index}. Argument: ${arg}"
+		(( index++ ))
+	done
+}
+
+clean program1 25 98 arg4
+
+**bash: source func**
+Script all arguments 
+going to clean directory...
+Function first argument program1
+Function all arguments program1 25 98 arg4
+Function all arguments program1 25 98 arg4
+Index: 0. Argument: program1
+Index: 1. Argument: 25
+Index: 2. Argument: 98
+Index: 3. Argument: arg4
+### Непонятная передача аргументов прям в bash
+**bash: source func f1 f2 gt**
+Script all arguments f1 f2 gt
+going to clean directory...
+Function first argument program1
+Function all arguments program1 25 98 arg4
+Function all arguments program1 25 98 arg4
+Index: 0. Argument: program1
+Index: 1. Argument: 25
+Index: 2. Argument: 98
+Index: 3. Argument: arg4
+### Возвращает статус
+echo "Script all arguments $*"
+
+clean() {
+	echo "going to clean directory..."
+	echo "Function first argument $1" # первый входящий аргумент
+	echo "Function all arguments $@" # аргументы разделены
+	echo "Function all arguments $*" # все аргументы как строка
+	index=0
+	for arg in "$@" ; do 
+		echo "Index: ${index}. Argument: ${arg}"
+		(( index++ ))
+	done
+	return 5
+}
+
+clean program1 25 98 arg4
+echo "Clean function status: $?"
+### Странный возврат (просто вывод строки из функции)
+echo "Script all arguments $*"
+
+clean() {
+	echo "going to clean directory..."
+	echo "Function first argument $1" # первый входящий аргумент
+	echo "Function all arguments $@" # аргументы разделены
+	echo "Function all arguments $*" # все аргументы как строка
+	index=0
+	for arg in "$@" ; do 
+		echo "Index: ${index}. Argument: ${arg}"
+		(( index++ ))
+	done
+	echo "return value from function" # типа любое значение из функции передать через echo
+}
+
+result=$(clean program1 25 98 arg4) #result = тому что передало echo
+echo "Clean function result: ${result}" 
+### local переменные
+echo "Script all arguments $*"
+
+clean() {
+	echo "going to clean directory..."
+	echo "Function first argument $1" # первый входящий аргумент
+	echo "Function all arguments $@" # аргументы разделены
+	echo "Function all arguments $*" # все аргументы как строка
+	local index=0
+	for arg in "$@" ; do 
+		echo "Index: ${index}. Argument: ${arg}"
+		(( index++ ))
+	done
+	echo "return value from function"
+}
+
+result=$(clean program1 25 98 arg4)
+echo "Clean function result: ${result}"
+### comments
+m ##############
+## 33 Practice
+https://github.com/dmdev2020/bash-starter/tree/lesson-33
+### application file
+```
+#!/bin/bash
+
+if [[ -f "./env.sh" ]]; then
+  echo "Use env variables from file ${PWD}/env.sh"
+  source ./env.sh
+fi
+
+DB_CONTAINER_NAME="spring-postgres"
+workDir="${WORKING_DIRECTORY:=~/Workspace}"
+
+help() {
+  echo "
+  Usage:
+    ./application init - init working directory and database
+    ./application clean - clean working directory and stop database
+    ./application build - run JUnit tests to check app health (-skipTests arg to skip tests) and build jar
+    ./application up - launch application
+  "
+}
+
+up() {
+  cd "${workDir}/spring-starter/build/libs" || exit
+  java -jar spring-starter-*.jar
+}
+
+build() {
+  cd "${workDir}/spring-starter" || exit
+
+  ./gradlew clean
+
+  if [[ "$1" = "-skipTests" ]] || ./gradlew test; then
+    echo "Application is building..."
+    ./gradlew bootJar
+  else
+    echo "Tests failed. See test report or send -skipTests arg to skip tests"
+  fi
+}
+
+clean() {
+#  remove working directory
+  echo "Removing working directory ${workDir}..."
+  rm -rf "${workDir}"
+
+#  stop docker container (PostgreSQL)
+  if docker ps | grep "${DB_CONTAINER_NAME}"; then
+    echo "Stopping container name ${DB_CONTAINER_NAME}..."
+    docker stop "${DB_CONTAINER_NAME}"
+  fi
+}
+
+init() {
+#  init working directory
+  mkdir -p "${workDir}"
+  cd "${workDir}" || exit
+
+# git clone
+  if [[ ! -d "spring-starter" ]]; then
+    git clone git@github.com:dmdev2020/spring-starter.git
+  fi
+  cd "spring-starter" || exit
+  git checkout lesson-125
+
+#  PostgreSQL
+  docker pull postgres
+#  $(docker ps -a | grep "${DB_CONTAINER_NAME}")
+  if docker ps -a | grep "${DB_CONTAINER_NAME}"; then
+    docker start "${DB_CONTAINER_NAME}"
+  else
+    docker run --name "${DB_CONTAINER_NAME}" \
+        -e POSTGRES_PASSWORD=pass \
+        -e POSTGRES_USER=postgres \
+        -e POSTGRES_DB=postgres \
+        -p 5433:5432 \
+        -d postgres
+  fi
+}
+
+case $1 in
+help)
+  help
+  ;;
+init)
+  init
+  ;;
+clean)
+  clean
+  ;;
+build)
+  build $2
+  ;;
+up)
+  up
+  ;;
+*)
+  echo "$1 command is not valid"
+  exit 1
+  ;;
+esac
+```
+### env
+WORKING_DIRECTORY=~/Workspace
+### Ссылки
+https://www.gnu.org/software/bash/manual/bash.html
+https://google.github.io/styleguide/shellguide.html
+## scp - копировать файлы с удалённого сервера
+man scp
+scp — secure copy (remote file copy program)
+## history
 ```
 tail ~/.bash_history
 history - история
@@ -584,21 +1143,14 @@ history - история
 ```
 echo $HISTSIZE  - количество запросов в памяти
 history -c    - history clear
-## 24 gpt
+## gpt
 chmod - Команда используется для изменения прав доступа к файлам и директориям
 chmod u+x script.sh  - Установить право выполнения для владельца файла
 chmod g-w файл.txt   - Удалить право записи для группы:
 chmod u+rwx,g+r,o+r файл.txt  - Установить права чтения, записи и выполнения для владельца, и права чтения для группы и остальных пользователей:
 chmod -R u+r,go-w /путь/к/директории  - Рекурсивно изменить права доступа для всех файлов и поддиректорий в указанной директории:
-## 25 /dev/null - чёрная дыра (поток просто исчезает)
+## /dev/null - чёрная дыра (поток просто исчезает)
 find . -name "info" 2> /dev/null
-## 4.23 курс shell and bash Удалённое подключение TCP/IP (ssh, scp, sftp,...)
-
-
-
-
-
-
 ## My notes 
 ctr + alt + t  - bash
 exit - close bash
@@ -626,12 +1178,14 @@ apt list --installed
 apt search <название_программы>
 3: Для просмотра списка доступных программ с постраничным выводом:
 apt list | less
-
-
-
-
-
-#
+## 2: Настроить нужный софт (в нашем случае vim)
+apt-get update
+apt-get install apt-file
+apt-file update
+apt-get install vim
+echo hello vim > test.txt
+vim test.txt
+# в 
 command 'win' from deb wily
   command 'link' from deb coreutils
   command 'din' from deb din
@@ -640,4 +1194,4 @@ command 'win' from deb wily
   command 'lie' from deb lie
   command 'lein' from deb leiningen
   command 'lid' from deb id-utils
-#
+#в
