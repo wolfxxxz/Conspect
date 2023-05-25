@@ -1,0 +1,26 @@
+андроид разработка базовый курс + 
+https://coursehunter.net/course/android-razrabotka-bazovyy-kurs
+
+Котлин - ява + иос Но нужен ява начальный уровень +
+https://coursehunter.net/course/kotlin-uroven-1-osnovy-programmirovaniya
+
+Golang ninja - веб приложения +
+https://coursehunter.net/course/golang-ninja-razrabotka-veb-prilozheniy-na-go
+
+Ява 1-3 +
+https://coursehunter.net/course/ekspert-programmist-java-1-3-uroven
+
+Докер для чайников +
+https://coursehunter.net/course/docker-dlya-nachinayushchih-i-chaynikov-prakticheskiy-opyt
+Полный курс + 
+https://coursehunter.net/course/docker-polnyy-kurs-docker
+
+Мобильная разработка под андроид +
+https://coursehunter.net/course/razrabotka-mobilnyh-prilozheniy-pod-android-uroven-1
+https://coursehunter.net/course/razrabotka-mobilnyh-prilozheniy-pod-android-uroven-2
+https://coursehunter.net/course/razrabotka-mobilnyh-prilozheniy-pod-android-uroven-3
+
+Алгоритмы +
+https://coursehunter.net/course/osnovy-resheniya-algoritmicheskih-zadach
+
+
