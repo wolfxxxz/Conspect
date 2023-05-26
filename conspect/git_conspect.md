@@ -1226,6 +1226,11 @@ hint: to the same ref. You may want to first integrate the remote changes
 hint: (e.g., 'git pull ...') before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 **Эта ошибка говорит о том что были изминения и сразу их нужно скачать**
+1. Качаем изминения git pull ... ...
+2. Заходим в файл и выбераем что сохранить code ...
+3. git add .
+4. git commit -m " "
+5. git нужно чуть времени на то что бы обновить инфо на сайте -> больше 5 минут
 D:\Onedrive\Рабочий стол\us2\newLine>**git pull origin master**
 remote: Enumerating objects: 5, done.
 remote: Counting objects: 100% (5/5), done.
