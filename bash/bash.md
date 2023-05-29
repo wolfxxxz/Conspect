@@ -84,6 +84,7 @@ cp -vR test4 copyTest  - копирует всё содержимое -R и по
 'test4/test5' -> 'copyTest/test5'
 'test4/test.txt' -> 'copyTest/test.txt'
 cp -vR bind/. SlovarNV - копировать всё содержимое папки bind в папку SlovarNV
+cp -R SlovarNV/* newSlovarNV - копировать всё содержимое SlovarNV в папку newSlovarNV
 ## 7 df (inot), ln (LINK)
 ### df - display free disk space
 man df

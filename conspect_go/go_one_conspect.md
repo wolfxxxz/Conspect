@@ -119,7 +119,6 @@ func main() {
 }
 # Типы данных 
 
-
 ## Boolean => default false
 	var firstBoolean bool
 	fmt.Println(firstBoolean)
