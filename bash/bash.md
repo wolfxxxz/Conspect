@@ -577,6 +577,9 @@ mvmir@mvmir-Lenovo-ideapad-320-15IKB:~/go/src/github.com/Wolfxxxz$
 2. Запись алиаса в bashrc
 echo "alias goWolfxxxz='cd ~/go/src/github.com/Wolfxxxz'" >> ~/.bashrc
 source ~/.bashrc  -- обновить bashrc
+3. 
+echo "alias goSlovar='cd ~/go/src/github.com/Wolfxxxz/SlovarNV ; ./SlovarNV'" >> ~/.bashrc
+source ~/.bashrc  -- обновить bashrc
 # 4 shell and bash Удалённое подключение TCP/IP (ssh, scp, sftp,...)
 ## 23 Установка удалённого контейнера docker
 ### /ubuntu-ssh/

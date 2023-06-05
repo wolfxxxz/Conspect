@@ -1,19 +1,20 @@
 
-## 5.1 Паралелизм Многозадачность
+# 5.1 Паралелизм Многозадачность
 Свойство среды паралельно обрабатывать задачи
-### Вытесняющая многозадачность
+**Вытесняющая многозадачность**
 Система сама распределяет приоритеты
 windows Linux and Mac
-### конкурентная многозадачность Go
+**конкурентная многозадачность Go**
 где планировщик горутин самостоятельно управляет выполнением горутин. Каждая горутина выполняется независимо и может быть приостановлена или возобновлена планировщиком горутин в любой момент. Планировщик горутин определяет, когда горутина будет выполнена и на каком процессоре.
-### Переключение контекста
+**Переключение контекста**
 Желательно сохранится при переключении на другую задачу
-## 5.2.1 Процесс и Поток Треды и горутины
+# 5.2 Процесс и Поток Треды и горутины вступление
+## Теория
 Процесс - это запуск программы
 Поток - запуск части процесса
 Goroutine - это легковесный поток который может выполнятся паралельно и независимо от выполнения остального кода в программе
-### Горутина на практике
-#### Без горутины
+## Горутина на практике
+### Без горутины
 **main.go**
 func workAndPrint(num int) {
 	fmt.Printf("Start Job #%v\n", num)
@@ -39,7 +40,7 @@ End Job #3: valc = 2997
 End Job #4: valc = 3996
  Start Job #5
 End Job #5: valc = 4995
-#### +go
+### +go
 **main.go**
 func workAndPrint(num int) {
 	fmt.Printf("Start Job #%v\n", num)
@@ -73,7 +74,7 @@ End Job #3: valc = 2997
 5. В цикле было запущено 5 горутин и все они выполняются но если не будет time.Sleep - они просто не успеют вывести результат
 6. Разбалансированными получаются даже принты - это доказывает что горутины выполняются разное количество времени
 7. Горутины как пчёлы без летка - кто куда и как хочет так и летит
-#### горутины выполняются разное количество времени
+### горутины выполняются разное количество времени
 **main.go**
 func workAndPrint(num int) {
 	fmt.Printf("Start Job #%v\n", num)
@@ -100,7 +101,7 @@ Start Job #3
 End Job #4 
  End Job #2 
  End Job #3 
-### Пакет runtime.Gosched() - типа паузы 
+## Пакет runtime.Gosched() - типа паузы 
 #### runtime.Gosched() 
 является простой функцией планировщика горутин и не принимает никаких аргументов. Она выполняет переключение контекста между горутинами, предоставляя возможность другим горутинам запуститься.
 #### Пример
@@ -133,7 +134,8 @@ fmt.Println(runtime.NumCPU())
 Эта функция завершает текущую горутину без завершения остальных горутин.
 #### runtime.GC():
  Эта функция запускает сборщик мусора (garbage collector) для освобождения неиспользуемой памяти.
-## 5.3.1 Обработка ошибок
+# 5.3 Обработка ошибок и Panic
+## 5.3.1 err := errors.New("error happened")
 ### Теория
 Errors vs Exceptions
 Err - находится под управлением програмиста (без чего в принципе можно работать приложению)
@@ -168,6 +170,7 @@ func main() {
 	fmt.Println(mistake)                //first mistake: second mistake
 	fmt.Println(errors.Unwrap(mistake)) //second mistake
 }
+### Примеры
 ### Пример if errors.Is(err, target)
 **Если ошибка связана с типом...**
 type TypeMistake struct {
@@ -300,21 +303,19 @@ func main() {
 	fmt.Println("ok")
 }
 ## 5.3.2 Panic
+### Теория
 Паника - это функция которая создаёт ошибку рантайма
 panic("message")
 recErr := recover() // recErr == message
-### Чуть теории
-Runtime (рантайм) в контексте программирования обычно относится к программной среде, которая обеспечивает выполнение и управление программой во время её работы. В языке Go (Golang) пакет runtime предоставляет функциональность, связанную с выполнением программы, такую как управление горутинами, аллокацией памяти, сборкой мусора и другими операциями, связанными с запущенной программой.
-
-Некоторые из функций и возможностей, предоставляемых пакетом runtime в Go, включают:
-
-go - для запуска новой горутины.
-GOMAXPROCS - для установки максимального числа используемых процессоров.
-NumCPU - для получения количества доступных процессоров.
-MemStats - для получения статистики использования памяти.
-GC - для явного запуска сборки мусора.
-Gosched - для переключения выполнения между горутинами.
-Panic и Recover - для обработки паники (непредвиденного сбоя программы) и восстановления контроля над программой.
+**Runtime** (рантайм) в контексте программирования обычно относится к программной среде, которая обеспечивает выполнение и управление программой во время её работы. В языке Go (Golang) пакет runtime предоставляет функциональность, связанную с выполнением программы, такую как управление горутинами, аллокацией памяти, сборкой мусора и другими операциями, связанными с запущенной программой.
+### пакет runtime в Go, включают:
+**go** - для запуска новой горутины.
+**GOMAXPROCS** - для установки максимального числа используемых процессоров.
+**NumCPU** - для получения количества доступных процессоров.
+**MemStats** - для получения статистики использования памяти.
+**GC** - для явного запуска сборки мусора.
+**Gosched** - для переключения выполнения между горутинами.
+**Panic и Recover** - для обработки паники (непредвиденного сбоя программы) и восстановления контроля над программой.
 Пакет runtime в Go предоставляет различные возможности для управления выполнением программы и управления ресурсами. Он является частью стандартной библиотеки Go и используется для создания эффективных и надежных программ.
 ### Пример борьбы с паникой
 **Паника завершается закрытием программы**
@@ -413,9 +414,203 @@ func main() {
 	iteration()
 	fmt.Println("everything doing wrong")
 }
-## 5.4.1 Каналы
-### Каналы нужны для взаимодействия между горутинами
-### канал как входящий аргумент Функции
+# 5.4 Каналы + Select
+## Теория Синхронизация, Блокировка, Буфер, <-, close(ch)
+### Синхронизация и канал без буфера: 
+Каналы обеспечивают синхронизацию между горутинами. Запись в канал блокирует горутину, пока другая горутина не прочитает данные из канала, и наоборот, чтение из канала блокирует горутину, пока другая горутина не запишет данные в канал.
+### Блокировка: 
+Операции чтения и записи с каналами блокируют горутину до тех пор, пока они не будут успешно выполнены. Это позволяет горутинам синхронизировать свою работу и избежать состояния гонки.
+### Пример Синхронизация и блокировка
+func main() {
+	ch := make(chan int)
+	quit := make(chan int)
+
+	// Горутина может работать с каналом без буфера
+	go func() {
+		for i := 1; i < 5; i++ {
+			ch <- i
+			fmt.Println("ch writed and wait read", i)
+			time.Sleep(time.Second * 1)
+		}
+		close(ch)
+	}()
+
+	go func() {
+		for j := range ch {
+			quit <- j
+			fmt.Println("quit writed and wait read", j)
+			time.Sleep(time.Second * 1)
+		}
+
+		close(quit)
+	}()
+
+	// Получается что мейн синхронизирует работу горутин
+
+	for j := range quit {
+		fmt.Println("main read", j)
+	}
+	fmt.Println("All goroutines completed.")
+
+}
+#### Пример 2 Канал без буфера Синхронизация
+func send(ch chan int) {
+	fmt.Println("Send: Начинаем работать")
+	for i := 0; i <= 10; i++ {
+		ch <- i
+		fmt.Printf("Send: Отправляю в канал %v и жду", i)
+		time.Sleep(time.Second * 1)
+	}
+	fmt.Println("Send: Закрываю канал")
+	close(ch)
+}
+
+func get(ch chan int, b chan bool) {
+	fmt.Println("Get: Открыта получать")
+	for num := range ch {
+		fmt.Printf(" || Get: Принимаю %v и жду следующего\n", num)
+		time.Sleep(time.Second * 1)
+	}
+	fmt.Println("Get: Отправляю tru в канал для закрытия main")
+	b <- true
+}
+func main() {
+	fmt.Println("main начинаю работать")
+	ch := make(chan int)
+	bch := make(chan bool)
+	go send(ch)
+
+	go get(ch, bch)
+
+	<-bch
+	fmt.Println("main получила true и закончила работу")
+
+}
+### Пример main wait <- true
+func main() {
+	ch := make(chan int)
+	done := make(chan bool)
+
+	go func() {
+		for i := 1; i < 11; i++ {
+			fmt.Println("write ", i)
+			ch <- i
+			time.Sleep(time.Second * 1)
+		}
+		close(ch)
+	}()
+
+	go func() {
+		for num := range ch {
+			fmt.Println("read ", num)
+			time.Sleep(time.Second * 1)
+		}
+		done <- true
+
+	}()
+	<-done
+}
+### Буферизация:
+ Каналы могут быть буферизованными или небуферизованными. Небуферизованные каналы имеют емкость 0, что означает, что запись и чтение происходят синхронно. Буферизованные каналы имеют емкость больше 0, что позволяет записывать данные в канал без блокировки до тех пор, пока канал не заполнится.
+### Операторы <-: Оператор <- 
+используется для отправки (записи) или получения (чтения) данных из канала. Например, ch <- value используется для отправки значения value в канал ch, а x := <-ch используется для получения значения из канала ch и присваивания его переменной x.
+### close(ch), j,ok := <-chan, for i := range ch
+**close(ch) сигнализирует о закрытии канала и range ch знает где закончить итерацию**
+ Каналы могут быть закрыты с помощью функции close(ch). Закрытие канала указывает, что больше значений не будет отправлено в канал, но его можно по-прежнему использовать для чтения значений, которые уже находятся в канале.
+## Небуферезированный канал
+//небуферизованный канал создает точку синхронизации между
+//горутинами, где запись и чтение происходят синхронно.
+// Когда записывающая горутина записывает значение в
+//небуферизованный канал, она блокируется до тех пор,
+//пока другая горутина не прочитает значение.
+
+func writeChan(ch chan<- int) {
+	for i := 0; i <= 5; i++ {
+		// и вот тут происходит чудо
+		// записав первое значение в канал
+		// горутина останавлевается
+		// и ждёт пока кто то не прочтёт его и
+		// только потом записывает второе значение
+		ch <- i
+		fmt.Println("Жду пока прочитают", i)
+		time.Sleep(time.Second * 1)
+	}
+
+	close(ch)
+}
+
+func main() {
+	fmt.Println("Start First")
+
+	ch := make(chan int)
+
+	go writeChan(ch)
+
+	for i := range ch {
+		fmt.Println("Читаю")
+		fmt.Println("chan i = ", i)
+		time.Sleep(time.Second * 1)
+	}
+
+	fmt.Println("END First")
+}
+## Буферизованный канал
+// буферизованный канал принимает все ОБЬЯВЛЕННЫЕ
+// значения сразу а потом ведёт себя как небуферезированный
+
+func writeChan(ch chan<- int) {
+	for i := 0; i <= 5; i++ {
+		ch <- i
+		fmt.Println("Пишу: ", i)
+	}
+	close(ch)
+}
+
+func main() {
+	fmt.Println("Start First")
+
+	ch := make(chan int, 5)
+
+	go writeChan(ch)
+
+	fmt.Println("time sleep")
+	time.Sleep(time.Second * 2)
+
+	for i := range ch {
+		fmt.Println("Читаю chan i = ", i)
+		time.Sleep(time.Second * 1)
+	}
+
+	fmt.Println("END First")
+}
+### Горутина создаёт буфер для небуфер канала
+func main() {
+	ch := make(chan int)
+	quit := make(chan int, 1)
+
+	// Горутина может работать с каналом без буфера
+	go func() {
+		ch <- 1
+		close(ch)
+	}()
+
+	j := <-ch
+	// main не может без буффера
+	quit <- j
+	close(quit)
+
+	// результат не определён
+
+	select {
+	case x := <-ch:
+		fmt.Println("ch = ", x)
+	case <-quit:
+		fmt.Println("quit")
+	default:
+		fmt.Println("default")
+	}
+}
+### Пример 1 канал как входящий аргумент Функции
 // Функция является БЛОКИРУЮЩЕЙ так как
 // горутина будет ждать пока появятся данные в канале
 func readChan(ch chan int) {
@@ -471,6 +666,31 @@ func main() {
 
 	fmt.Println("END MAIN")
 }
+### Утечка горутин от gpt (goroutine leak)
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func leakyFunction() {
+	for {
+		time.Sleep(time.Second)
+	}
+}
+
+func main() {
+	for i := 0; i < 10; i++ {
+		go leakyFunction()
+	}
+
+	// Без какого-либо механизма для остановки горутин
+	// они будут продолжать работать вечно.
+	// Основная горутина не будет завершаться.
+	fmt.Println("End main")
+	time.Sleep(time.Hour)
+}
 ### канал с буфером ch := make(chan int, 1)
 func readChan(ch chan int) {
 	// <- Читаем из канала
@@ -484,12 +704,12 @@ func main() {
 	// Канал с буфером даёт возможность
 	// хранить в нём значение до вызова
 	// если количество отправленых значений в канал
-	// будет больше чем созданых в буфере == дедлок
+	// будет больше чем может прочитать программа == дедлок
 	ch := make(chan int, 2)
 
 	ch <- 50
 	ch <- 75
-
+	// ch <- 22 //deadlock!
 	go readChan(ch)
 
 	ch <- 100
@@ -501,19 +721,50 @@ func main() {
 
 	fmt.Println("END MAIN")
 }
-## 5.4.3 Канал в цыкле for i := range ch; close(ch)
+### Каналы от gpt
+func sleep(t time.Duration, ch chan bool) {
+	fmt.Println("Sleep ", t)
+	time.Sleep(t)
+	ch <- true
+}
+
+func main() {
+	ch := make(chan bool)
+
+	go sleep(1*time.Second, ch)
+	<-ch // Ждем завершения первой горутины
+
+	go sleep(5*time.Second, ch)
+	<-ch // Ждем завершения второй горутины
+
+	go sleep(7*time.Second, ch)
+	<-ch // Ждем завершения третьей горутины
+
+	fmt.Println("End main")
+}
+## 5.4.2 ch chan <- int || ch <-chan int
 // ch chan<- int  - канал доступен только на запись
 // ch <-chan int  - канал доступен только на чтение
 func writeChan(ch chan<- int) {
+    ch <- 42 // отправка значения в канал
+}
+
+В объявлении функции writeChan(ch chan<- int), стрелка <- указывает на направление передачи данных по каналу. В данном случае, chan<- int означает, что функция writeChan является отправителем и может только отправлять (писать) значения в канал ch.
+
+То есть, функция writeChan принимает канал ch в качестве параметра, и стрелка <- перед типом канала (chan) указывает на то, что функция будет использовать этот канал только для отправки значений. Внутри функции writeChan можно использовать оператор ch <- value для отправки значения value в канал.
+
+Таким образом, объявление функции с chan<- int позволяет явно указать, что функция может только отправлять значения в указанный канал. Это помогает сделать код более ясным и улучшить безопасность типов при работе с каналами.
+## 5.4.3 Канал в цыкле for i := range ch; close(ch)
+### for i:= range
+func writeChan(ch chan<- int) {
 	for i := 0; i <= 5; i++ {
 		ch <- i
+		// и ждём пока кто то прочитает из канала
 	}
 	// закрываем канал
-	// он типа ставит метку что работа закончина
-	// если его не закрыть то он останется открытым на приём и
-	// при чтении из него всё будет ждать от него новых данных
+	// close(ch) - ставит метку что работа окончена
+	// что б range знал что канал закрылся
 	close(ch)
-	// ждём пока кто то решит прочитать этот канал
 }
 
 func main() {
@@ -530,6 +781,38 @@ func main() {
 
 	fmt.Println("END MAIN")
 }
+### for j,ok := <-chan
+**канал возвращает два значения**
+func main() {
+	ch := make(chan int, 1)
+	quit := make(chan int, 1)
+
+	ch <- 1
+	close(ch)
+
+	go func() {
+		for {
+			j, ok := <-ch
+			if !ok {
+				break
+			}
+			quit <- j
+		}
+		close(quit)
+	}()
+
+	runtime.Gosched()
+	time.Sleep(time.Second * 1)
+
+	select {
+	case x := <-ch:
+		fmt.Println("ch = ", x)
+	case <-quit:
+		fmt.Println("quit")
+	default:
+		fmt.Println("default")
+	}
+}
 ## 5.4.5 Select
 ### Инструкция Select
 select {
@@ -538,6 +821,28 @@ select {
     case <- quit:
          fmt.Println("quit)
          return
+}
+### Ошибка при отправке в канал без буфера и без горутины
+func main() {
+	ch := make(chan int)
+
+	// Возможен такой способ отправки в канал
+	//Внимательно НЕбуферезированный канал так работать не будет
+	ch <- 1
+	//Когда в главной горутине выполняется ch <- 1,
+	//она пытается отправить значение 1 в канал ch,
+	// но остановится на этой строке, так как никакая
+	// другая горутина не готова принять это значение из канала.
+	//Это приводит к зависанию программы.
+	runtime.Gosched()
+	time.Sleep(time.Second * 1)
+
+	select {
+	case x := <-ch:
+		fmt.Println("ch = ", x)
+	default:
+		fmt.Println("default")
+	}
 }
 ### Пример 1 Select
 func writeChanal(ch chan<- int, b int) {
@@ -552,8 +857,10 @@ func main() {
 
 	go writeChanal(quit, 10)
 	//go writeChanal(ch, 5)
+
+	// Возможен такой способ отправки в канал
 	//Внимательно НЕбуферезированный канал так работать не будет
-	ch <- 1
+	ch <- 1 //ch := make(chan int) == deadlock
 
 	runtime.Gosched()
 	time.Sleep(time.Second * 1)
@@ -599,11 +906,653 @@ func main() {
 	time.Sleep(time.Second * 1)
 
 }
-## 5.5.1 Базовые принципы синхронизации
-## 5.5.1 Примитивы синхронизации Мьютекс и семофор
-## 5.5.3 Мьютекс блокирует процесс для одного пользователя
-### Семофор ограничевает количество потоков
-## WaitGroup, Каналы, Select
-## Пакет Context
+### Пример 3 Select в цикле
+func writeChanal(ch chan<- int, b int) {
+	ch <- b
+	close(ch)
+}
 
-## 
+func read(ch, quit <-chan int) {
+	for {
+		select {
+		case x := <-ch:
+			if x == 0 {
+				continue
+			} else {
+				fmt.Println("ch = ", x)
+			}
+		case <-quit:
+			fmt.Println("quit")
+			return
+		}
+	}
+}
+
+func main() {
+	ch := make(chan int)
+	quit := make(chan int)
+
+	go read(ch, quit)
+
+	go writeChanal(quit, 10)
+	go writeChanal(ch, 5)
+	runtime.Gosched()
+	time.Sleep(time.Second * 1)
+
+}
+### Пример 4 select go and for
+func send(ch chan int) {
+	fmt.Println("Send: Начинаем работать")
+	for i := 0; i <= 10; i++ {
+		ch <- i
+		time.Sleep(time.Second * 1)
+	}
+	close(ch)
+}
+
+func main() {
+	fmt.Println("main начинаю работать")
+	ch := make(chan int)
+	ch2 := make(chan bool, 1)
+	go send(ch)
+	go func() {
+		for {
+			select {
+			case _, ok := <-ch:
+				if ok {
+					fmt.Println("ok")
+					continue
+				} else {
+					fmt.Println("ch<-true")
+					//break
+					ch2 <- true
+
+				}
+			}
+			break
+		}
+	}()
+	<-ch2
+
+	fmt.Println("main получила true и закончила работу")
+}
+# 5.5 Примитивы синхронизации и гонки данных. Мьютекс, семофор и atomic. WaitGroup, timer, ticker, Context
+## 5.5.2 Atomic "sync/atomic"
+**операция "атомарно" означает, что операция выполняется неделимо и не может быть прервана другими операциями**
+type Client struct {
+	Age int64
+}
+type SonClient struct {
+	Age int64
+}
+
+func addAge(cl *Client, sc *SonClient, add int64) {
+	atomic.AddInt64(&cl.Age, add)
+	sc.Age = sc.Age + add
+}
+
+func main() {
+	cl := &Client{}
+	sc := &SonClient{}
+
+	for i := 1; i <= 100; i++ {
+		go addAge(cl, sc, int64(i))
+	}
+
+	time.Sleep(time.Second * 1)
+	fmt.Printf("%#v\n", cl) //&main.Client{Age:5050}
+	fmt.Printf("%#v\n", sc) //&main.SonClient{Age:4951}
+}
+## 5.5.3 Мьютекс блокирует процесс для одного пользователя (одной горутины) mu := sync.Mutex{}
+Мьютекс - синхронизирует доступ к данным путём явной блокировки (без каналов)
+### Создание mu := &sync.Mutex{}
+### Example 1
+#### Mistake &main.Client{Age:977}
+type Client struct {
+	Age int
+}
+
+func addAge(cl *Client, add int) {
+	cl.Age = cl.Age + add
+}
+
+func main() {
+	cl := &Client{}
+
+	for i := 1; i <= 1000; i++ {
+		go addAge(cl, 1)
+	}
+
+	time.Sleep(time.Second * 1)
+	fmt.Printf("%#v\n", cl)
+}
+#### Solution &Mutex mu.Lock() mu.Unlock()
+**Использование mutex ограничевает доступ к функции только одной goRutine**
+type Client struct {
+	Age int
+}
+
+// Функция принимает ссылку на mutex
+func addAge(cl *Client, add int, mu *sync.Mutex) {
+	// Если одна горутина работают то остальным доступ закрыт
+	mu.Lock()
+	cl.Age = cl.Age + add
+	// После выполнения разблокировать доступ
+	mu.Unlock()
+}
+
+func main() {
+	cl := &Client{}
+	// Обязательно ссылка на sync.Mutex
+	mu := &sync.Mutex{}
+
+	for i := 1; i <= 1000; i++ {
+		// Передаём ссылку на mutex в функцию
+		go addAge(cl, 1, mu)
+	}
+
+	time.Sleep(time.Second * 1)
+	fmt.Printf("%#v\n", cl)
+}
+## 5.5.4 Семофор ограничевает количество одновременно запущенных потоков
+### Пример
+func worker(ctx context.Context, id int, sema chan struct{}, wg *sync.WaitGroup) {
+	sema <- struct{}{} // Захват семафора
+	defer func() {
+		<-sema // Освобождение семафора
+		wg.Done()
+	}()
+
+	select {
+	case <-ctx.Done():
+		fmt.Printf("Worker %d aborted\n", id)
+		return
+	default:
+		fmt.Printf("Worker %d starts working\n", id)
+		time.Sleep(2 * time.Second)
+		fmt.Printf("Worker %d finishes working\n", id)
+	}
+}
+
+func main() {
+	parent := context.Background()
+	ctx, cancel := context.WithTimeout(parent, 3*time.Second)
+	defer cancel()
+	// Максимальное количество одновременно работающих горутин
+	concurrency := 3
+
+	sema := make(chan struct{}, concurrency)
+	wg := sync.WaitGroup{}
+
+	n := 10
+	wg.Add(n)
+	for i := 1; i <= n; i++ {
+		go worker(ctx, i, sema, &wg)
+	}
+
+	wg.Wait()
+}
+## 5.5.5 WaitGroup and time.Duration
+### Обязательно
+1. var wg sync.WaitGroup
+2. firstMessage(message string, ftimes int, wg *sync.WaitGroup) **функция получает ссылку на WaitGroup**
+3. wg.Add(2) - установить количество горутин
+4. defer wg.Done() **уменьшает количество ожидаемых горутин**
+5. wg.Wait() - ожидает пока wg.Done не закроет нужное количество горутин и не даёт main закончится 
+### Example 1 and time.Duration
+func sleep(t time.Duration, wg *sync.WaitGroup) {
+	fmt.Println("Sleep ", t)
+	time.Sleep(t)
+	// wg.Done - уменьшает количество процессов
+	// в счётчике wg.Wait
+	wg.Done()
+}
+
+func main() {
+	wg := &sync.WaitGroup{}
+
+	//wg.Add(1) - Даём счётчику wg.Wait понять,
+	// сколько процессов нужно ждать
+	wg.Add(1)
+	go sleep(1*time.Second, wg)
+
+	wg.Add(1)
+	go sleep(2*time.Second, wg)
+
+	wg.Add(1)
+	go sleep(3*time.Second, wg)
+
+	// wg.Wait() - ожидает пока значение счётчика не станет == 0
+	// якорь который не даёт свернутся main
+	wg.Wait()
+	fmt.Println("End main")
+}
+### Example 2
+func firstMessage(message string, ftimes int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	time.Sleep(time.Duration(ftimes) * time.Second)
+	fmt.Println(message)
+}
+
+func secondMessage(message string, ftimes int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	time.Sleep(time.Duration(ftimes) * time.Second)
+	fmt.Println(message)
+}
+
+func main() {
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go secondMessage("SECOND", 5, &wg)
+	go firstMessage("I'm first message", 2, &wg)
+	wg.Wait()
+
+	fmt.Println("End main")
+}
+### Example 3
+func main() {
+	ch := make(chan int, 12)
+	ch2 := make(chan int)
+	//done := make(chan bool)
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		for i := 1; i < 11; i++ {
+			d := rand.Intn(11)
+			ch <- d
+		}
+		close(ch)
+		fmt.Println("random numbers generated")
+
+	}()
+
+	go func() {
+		defer wg.Done()
+		for s := range ch {
+			d := s * 2
+			fmt.Printf("mult(%v, 2)=%v\n", s, d)
+			ch2 <- d
+			time.Sleep(time.Second * 1)
+		}
+		close(ch2)
+
+	}()
+
+	go func() {
+
+		for num := range ch2 {
+			fmt.Println("read ", num)
+			time.Sleep(time.Second * 1)
+		}
+	}()
+
+	wg.Wait()
+
+}
+## 5.5.7 Таймер timer := time.NewTimer(3*time.Second)
+### Теория
+Позволяет настраивать таймауты и ограничивать время выполнения функций
+### Exampl simple
+func jobWithTimeout(t *time.Timer, q chan string) {
+	time.Sleep(time.Second * 3)
+	q <- "Перемога !"
+	fmt.Println("end jobwithTimeout")
+}
+
+func main() {
+	timer := time.NewTimer(3 * time.Second)
+	quit := make(chan string)
+	// Ложим таймер и канал в функцию
+	go jobWithTimeout(timer, quit)
+
+	// Ждём ответ из канала таймера
+	// Или из канала quit
+	select {
+	case <-timer.C:
+		fmt.Println("Time over")
+	case x := <-quit:
+		fmt.Println("Received value from quit:", x)
+	}
+
+	fmt.Println("End main")
+}
+### Example fmt.scan +
+func jobWithTimeout(t *time.Timer, q chan string) {
+	fmt.Println("What is your name")
+	var word string
+	fmt.Scan(&word)
+	q <- word
+}
+
+func main() {
+	timer := time.NewTimer(15 * time.Second)
+	quit := make(chan string)
+	// Ложим таймер и канал в функцию
+	go jobWithTimeout(timer, quit)
+
+	// Ждём ответ из канала таймера
+	// Или из канала quit
+
+	select {
+	case <-timer.C:
+		fmt.Println("Time over")
+	case x := <-quit:
+		fmt.Println(" are you already?\nif it's correct?")
+		time.Sleep(time.Second * 3)
+		
+			if strings.EqualFold(x, answer) {
+				fmt.Println("You win")
+			} else {
+				fmt.Println("Try again")
+			}
+	}
+
+	fmt.Println("End main")
+}
+### Smile exampl
+func jobWithTimeout(t *time.Timer, q chan string) {
+	fmt.Println("What is your name")
+	var word string
+	fmt.Scan(&word)
+	q <- word
+}
+
+func main() {
+	timer := time.NewTimer(15 * time.Second)
+	quit := make(chan string)
+
+	go jobWithTimeout(timer, quit)
+
+	select {
+	case <-timer.C:
+		fmt.Println("Time over")
+	case x := <-quit:
+		fmt.Println("are you ready?")
+		time.Sleep(time.Second * 3)
+		compareNameIs(x)
+	}
+}
+
+func compareNameIs(name string) {
+	names := make(map[string]string)
+	names["Вова"] = "Хозяин жизни"
+	names["Даша"] = "Мелкая козявка высокого роста"
+	names["Аня"] = "Мелкая козявка сладкоешка"
+	names["Юля"] = "Любимая наша мамуля"
+	if nik, ok := names[name]; ok { // strings.EqualFold как его сюда засунуть?
+		fmt.Println("wait i'm work")
+		printDots()
+		time.Sleep(time.Second * 3)
+		fmt.Println(nik)
+	} else {
+		fmt.Println("Try again")
+	}
+}
+### Exampl тупой
+func main() {
+	// если 1 Время таймера timer закончилось
+	// если 3 Function successfull
+	var first = time.Duration(3) 
+	var last = time.Duration(2)
+	//timer
+	timer := time.NewTimer(first * time.Second)
+
+	// канал без буфера
+	quit := make(chan int)
+
+	// функция принимает таймер и канал
+	// тоесть если она выпонится за 3 секунды то
+	// "Время таймера timer закончилось"
+	go jobWithTimeout(timer, quit)
+
+	// ждём 2 секунды пока горутина выполнится
+	time.Sleep(last * time.Second)
+	// Выполняем работу...
+	// quit <- 1 - если отправить 
+
+	fmt.Println("End main")
+}
+
+// функция получает таймер (который запускается сам:) и
+// канал. Ждёт что произойдёт раньше (закончится таймер или
+// что то прийдёт в канал)
+func jobWithTimeout(t *time.Timer, q chan int) {
+	var middle = time.Duration(1)
+	// ждём 1 секунду
+	time.Sleep(middle * time.Second)
+	// типа роутер для каналов
+	select {
+	// когда выйдет время таймера == сработает канал <-t.C
+	// у таймера тоже есть канал
+	case <-t.C:
+		fmt.Println("Время таймера timer закончилось")
+	// канал таймера для принудительной остановки
+	// который невозможно просто спровоцировать в этом коде
+	case <-q:
+		if !t.Stop() {
+			<-t.C
+		}
+		fmt.Println("Timer stoped")
+		// если таймер не успеет сработать
+		// и никто принудительно не остановит таймер
+	default:
+		fmt.Println("Function successfull")
+	}
+}
+## 5.5.9 Ticker ticker:=time.NewTicker(1*time.Second)
+### Ticker main()
+func main() {
+	ticker := time.NewTicker(1 * time.Second)
+
+	count := 0
+	for tick := range ticker.C {
+		count++
+		fmt.Println(count, tick)
+		if count == 10 {
+			ticker.Stop()
+			break
+		}
+	}
+}
+### Ticker(chan bool, chan string)
+func main() {
+	done := make(chan bool)
+	stringa := make(chan string)
+	fmt.Println("i'm ticker")
+	go ticker(done, stringa)
+	time.Sleep(time.Second * 1)
+	fmt.Println("Write something")
+
+	time.Sleep(time.Second * 1)
+	var d string
+	fmt.Scan(&d)
+	stringa <- d
+	fmt.Println(d)
+	<-done
+}
+
+func ticker(done chan<- bool, stringa <-chan string) {
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+	word := "Hello"
+
+	count := 0
+	for range ticker.C {
+		count++
+		fmt.Println(count, word)
+		if count == 10 {
+			break
+		}
+		select {
+		case c := <-stringa:
+			word = c
+		default:
+			word = "Hello"
+		}
+	}
+	done <- true
+}
+## 5.5.10 Пакет Context ctx := context.Background()
+### Теория
+**кнопка отмены** ctx, cancel := context.WithCancel(context.Background())
+**таймер** ctx, _ := context.WithTimeout(context.Background()
+**расписание** context.WithDeadLine()
+### ctx, cancel := context.WithCancel(context.Background())
+#### Пример simple
+func main() {
+	// Создаем контекст с помощью context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Запускаем горутину, которая будет выполнять работу
+	go doWork(ctx)
+
+	// Ждем некоторое время
+	time.Sleep(2 * time.Second)
+
+	// Отменяем контекст, чтобы сигнализировать о завершении работы
+	cancel()
+
+	// Ждем, пока горутина завершит работу
+	time.Sleep(1 * time.Second)
+}
+
+func doWork(ctx context.Context) {
+	// Создаем контекст с помощью context.WithCancel(), чтобы иметь возможность отменить работу
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel() // Убеждаемся, что функция cancel() будет вызвана, чтобы освободить ресурсы
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Работа прервана")
+			return
+		default:
+			fmt.Println("Работа выполняется...")
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+#### Пример Slurm
+func main() {
+	//Получаем ссылку на контекст и функцию отмены
+	ctx, cancel := context.WithCancel(context.Background())
+
+	//Запускаем 10 горутин которые получают инт для 
+	//таймера от 0...10
+	for i := 0; i <= 10; i++ {
+		go sendData(ctx, i)
+	}
+	//Те горутины что успеют сработать за этот timeSleep
+	//будут считатся успешными
+	//потому что следом будет cancel который отменит все 
+	//ранее запущенные горутины
+	time.Sleep(time.Second * 5)
+	cancel()
+	//этот sleep для того что б успели напечататся 
+	//aborted
+	time.Sleep(time.Millisecond * 500)
+}
+
+func sendData(ctx context.Context, num int) {
+	timer := time.NewTimer(time.Duration(num) * time.Second)
+
+	select {
+		//Функция cancel передаёт сигнал ctx.Done
+	case <-ctx.Done():
+		fmt.Printf("Procces #%v aborted \n", num)
+		return
+	case <-timer.C:
+		fmt.Printf("Date procces #%v send successfully\n", num)
+	}
+}
+### ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+#### Пример 1
+func main() {
+	parent := context.Background()
+	//Получаем ссылку на контекст и функцию отмены
+	ctx, _ := context.WithTimeout(parent, 1*time.Second)
+
+	for i := 1; i <= 10; i++ {
+		go sendData(ctx, i)
+	}
+
+	time.Sleep(time.Second)
+	//cancel()
+	//cancel произойдёт сам через время из ctx
+	time.Sleep(time.Millisecond * 500)
+}
+
+func sendData(ctx context.Context, num int) {
+	timer := time.NewTimer(time.Duration(num) * time.Second)
+
+	select {
+	//Функция context.WithTimeout передаст сигнал cancel
+	//в заданое время сигнал ctx.Done
+	case <-ctx.Done():
+		fmt.Printf("Procces #%v aborted \n", num)
+		return
+	case <-timer.C:
+		fmt.Printf("Date procces #%v send successfully\n", num)
+	}
+}
+#### Пример context.WithTimeout + wg 
+func main() {
+	wg := &sync.WaitGroup{}
+	parent := context.Background()
+	ctx, _ := context.WithTimeout(parent, 3*time.Second)
+	n := 10
+	wg.Add(n)
+	for i := 1; i <= n; i++ {
+		go sendData(ctx, i, wg)
+	}
+	wg.Wait()
+}
+
+func sendData(ctx context.Context, num int, wg *sync.WaitGroup) {
+	timer := time.NewTimer(time.Duration(num) * time.Second)
+	select {
+	case <-ctx.Done():
+		fmt.Printf("Procces #%v aborted \n", num)
+		wg.Done()
+		return
+	case <-timer.C:
+		fmt.Printf("Date procces #%v send successfully\n", num)
+	}
+	wg.Done()
+}
+### context.WithDeadLine()
+Позволяет устанавливать время срабатывания
+# 6 Go на практике
+## 6.1 Структура и управление зависимостями
+### Принципы организации кода
+1. Single responsibilities - каждая функция отвечает за что то одно
+2. Функции и методы класса - отвечают только за работу с классом (type)
+### Структуры организации кода
+1. Source file (функции, методы...)
+2. Package - source files обьеденены одним смыслом (обьектом, назначением)
+3. Module - Хранилище packages
+### go get, go tidy - качает все пакеты которые не скачаны в проекте
+### Vendoring - go mod vendor
+Скачать все пакеты с зависимостями (типа сторонние пакеты) и положить их локально на пк
+## 6.2 Работа с ОС
+### **Package OS**
+1.Работа с системой
+2.Абстракция над реальными функциями
+3.Заточена под Linux системы
+### Package OS can
+1. Запуск приложений
+2. Работа с файлами и папками
+3. Отслеживание и управление процессами
+### OS.exec - Запуск команд из го
+1. Оборачивает системные вызовы
+2. Не использует шелл с паттернами
+3. Может не корректно работать с виндовс
+### Practice 
+
+
+
