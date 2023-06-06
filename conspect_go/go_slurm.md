@@ -1553,6 +1553,37 @@ func sendData(ctx context.Context, num int, wg *sync.WaitGroup) {
 2. Не использует шелл с паттернами
 3. Может не корректно работать с виндовс
 ### Practice 
+#### run firefox
+**SLURM/exec/simple.go**
+
+package exec
+
+import (
+	"log"
+	"os/exec"
+)
+
+func RunSimpleApp() {
+	cmd := exec.Command("firefox")
+
+	err := cmd.Run()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+**SLURM/main.go**
+package main
+
+import "SLURM/exec"
+
+func main() {
+	exec.RunSimpleApp()
+}
+- go build SLURM
+- ./SLURM
+#### 
+
 
 
 
