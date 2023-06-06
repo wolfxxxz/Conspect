@@ -1539,7 +1539,7 @@ func sendData(ctx context.Context, num int, wg *sync.WaitGroup) {
 ### go get, go tidy - качает все пакеты которые не скачаны в проекте
 ### Vendoring - go mod vendor
 Скачать все пакеты с зависимостями (типа сторонние пакеты) и положить их локально на пк
-## 6.2 Работа с ОС
+## 6.2 Работа с ОС флаги в стандартной библиотеке (фуфлижник)
 ### **Package OS**
 1.Работа с системой
 2.Абстракция над реальными функциями
@@ -1548,7 +1548,7 @@ func sendData(ctx context.Context, num int, wg *sync.WaitGroup) {
 1. Запуск приложений
 2. Работа с файлами и папками
 3. Отслеживание и управление процессами
-### OS.exec - Запуск команд из го
+### OS.exec - Запуск команд из go в bash
 1. Оборачивает системные вызовы
 2. Не использует шелл с паттернами
 3. Может не корректно работать с виндовс
@@ -1582,7 +1582,107 @@ func main() {
 }
 - go build SLURM
 - ./SLURM
-#### 
+**SLURM - будет работать пока я не закрою firefox**
+#### tr Run_app_with_simple_args
+func Run_app_with_simple_args() {
+	// типа bash $echo "Little slurm goes big" | tr 'a-z' 'A-Z'
+	cmd := exec.Command("tr", "a-z", "A-Z")
+
+	cmd.Stdin = strings.NewReader("Little slurm goes big")
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("translated phrase: %q\n", out.String())
+}
+#### echo Run_multiple_args
+func Run_multiple_args() {
+	prg := "echo"
+
+	arg1 := "there"
+	arg2 := "are slurms"
+	arg3 := "in SlurmLand"
+
+	cmd := exec.Command(prg, arg1, arg2, arg3)
+
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Print(string(stdout))
+}
+#### Input_pipe()
+func Input_pipe() {
+	cmd := exec.Command("cat")
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		defer stdin.Close()
+		io.WriteString(stdin, "an old slurm")
+	}()
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s\n", out)
+
+	//fmt.Printf("#{out}\n")
+}
+#### Capture_output
+func Capture_output() {
+	out, err := exec.Command("ls", "-l").Output()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(out))
+}
+#### Output_pipe
+func Output_pipe() {
+	cmd := exec.Command("echo", "piping slurms")
+
+	stdout, err := cmd.StdoutPipe()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	data, err := ioutil.ReadAll(stdout)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%s\n", string(data))
+}
+### Переменные окружения
+- Установка специфичных настроек для приложения (пароли, флаги и т.д)
+- Управление приложением из вне
+- Принадлежать пользователю
+### Flag
+
+## 6.3 Работа с файлами в го
 
 
 

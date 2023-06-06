@@ -1198,4 +1198,5 @@ command 'win' from deb wily
   command 'lie' from deb lie
   command 'lein' from deb leiningen
   command 'lid' from deb id-utils
-#в
+# tr
+echo "Little slurm goes big" | tr 'a-z' 'A-Z'

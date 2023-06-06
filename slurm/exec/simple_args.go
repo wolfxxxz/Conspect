@@ -9,6 +9,7 @@ import (
 )
 
 func Run_app_with_simple_args() {
+	// типа bash $echo "Little slurm goes big" | tr 'a-z' 'A-Z'
 	cmd := exec.Command("tr", "a-z", "A-Z")
 
 	cmd.Stdin = strings.NewReader("Little slurm goes big")
