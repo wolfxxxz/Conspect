@@ -1959,8 +1959,7 @@ func check(e error) {
 ## 6.4 Сеть
 ### Api
 ### Анализ трафика
-### Сервера
-### Как работает интернет или Модель OSI
+### 6.4.1 Как работает интернет или Модель OSI
 #### Уровни
 1. - Физический - железо + драйверы
      Кодирование декодирование сигнала
@@ -1974,8 +1973,7 @@ func check(e error) {
      Дешифровка и шифрование
 7. - Прикладной - HTTP, Telnet, SMTP
      Работа с прикладными клиентами
-#### Протоколы 
-##### TCP & UDP - Транспортный уровень (только отправка и получение)
+### 6.4.3 TCP & UDP - Транспортный уровень (только отправка и получение)
 - Оба транспортных протокола содержат данные
 - Делят данные на пакеты для передачи по сети
 - Работают на уровне конкретных машин
@@ -1987,8 +1985,13 @@ func check(e error) {
  Медленный                   || быстрый
  Используют в ЭП, загрузке   || Стриминг видео
  файлов, API                 || VoIP
+#### TCP Протокол с подтверждением
+##### TCP Server code
+**https://www.hw-group.com/software/hercules-setup-utility**
+func main() {
+	TCPServer()
+}
 
-##### TCP Server go
 func TCPServer() {
 	// Открываем соединение на listen(слушать) или на Write(писать)
 	// пакет net сам оформляет (заворачивает пакеты) в зависимости
@@ -2025,11 +2028,13 @@ func TCPServer() {
 func handleRequest(conn net.Conn) {
 	//Read []byte{}
 	buf := make([]byte, 1024)
+	//Байты в буф, количество байт в reqLen
 	reqLen, err := conn.Read(buf)
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
 	}
 	fmt.Println(reqLen)
+	fmt.Println(string(buf[:reqLen]))
 
 	//Write []byte{}
 	bytesWritten, err := conn.Write([]byte("Message received."))
@@ -2041,6 +2046,82 @@ func handleRequest(conn net.Conn) {
 	//close connection
 	conn.Close()
 }
-##### 6.4.3 11 minut
+##### TCP Client (отправка)
+func TCPClient() {
+	p := make([]byte, 1024)
+	conn, err := net.Dial("tcp", "localhost:1234")
+	if err != nil {
+		fmt.Printf("Some err #{err}")
+		return
+	}
+	fmt.Fprintf(conn, "H1 TCP Server, how are you doing?")
+	_, err = bufio.NewReader(conn).Read(p)
+
+	if err == nil {
+		fmt.Printf("%s", p)
+	} else {
+		fmt.Printf("Some error #{err}\n")
+	}
+	conn.Close()
+}
+#### UDP Протокол (быстрый) но беззащитный
+##### UDP Server
+// Если пришло сообщение кинуть назад ответ
+func sendResponse(conn *net.UDPConn, addr *net.UDPAddr) {
+	_, err := conn.WriteToUDP([]byte("From server: Hello i got your message "), addr)
+	if err != nil {
+		fmt.Printf("Couldn't send response %v\n", err)
+	}
+}
+
+func UDPServer() {
+//Можно структуркой где ip и порт
+	addr := net.UDPAddr{
+		Port: 1234,
+		IP:   net.ParseIP("127.0.0.1"),
+	}
+	ser, err := net.ListenUDP("udp", &addr)
+
+	if err != nil {
+		fmt.Printf("Some error %v\n", err)
+		return
+	}
+	fmt.Println("Listening on localhost:1234")
+
+	p := make([]byte, 2048)
+	for {
+		_, remoteaddr, err := ser.ReadFromUDP(p)
+
+		if err != nil {
+			fmt.Printf("Some error %v\n", err)
+			continue
+		}
+		go sendResponse(ser, remoteaddr)
+		if len(p) != 0 {
+			fmt.Println(string(p))
+			break
+		}
+		//go readMessage(ser, remoteaddr)
+	}
+}
+##### UDP Client
+func UDPClient() {
+	p := make([]byte, 1024)
+	conn, err := net.Dial("udp", "127.0.0.1:1234")
+	if err != nil {
+		fmt.Printf("Some err %v\n", err)
+		return
+	}
+	fmt.Fprintf(conn, "H1 UDP Server, how are you doing?")
+	_, err = bufio.NewReader(conn).Read(p)
+
+	if err == nil {
+		fmt.Printf("%s\n", p)
+	} else {
+		fmt.Printf("Some err %v\n", err)
+	}
+	conn.Close()
+}
+##
 
 
