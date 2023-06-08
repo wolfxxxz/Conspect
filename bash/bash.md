@@ -1155,7 +1155,7 @@ chmod u+rwx,g+r,o+r файл.txt  - Установить права чтения
 chmod -R u+r,go-w /путь/к/директории  - Рекурсивно изменить права доступа для всех файлов и поддиректорий в указанной директории:
 ## /dev/null - чёрная дыра (поток просто исчезает)
 find . -name "info" 2> /dev/null
-## My notes 
+# My notes 
 ctr + alt + t  - bash
 exit - close bash
 code SlovarNV - vsCode open SlovarNV
