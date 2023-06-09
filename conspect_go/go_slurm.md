@@ -1956,11 +1956,11 @@ func check(e error) {
 		panic(e)
 	}
 }
-## 6.4 Сеть
-### Api
-### Анализ трафика
+## 6.4 Сеть, модель OSI, TCP & UPD, HTTP
+### Api не дал?
+### Анализ трафика не дал?
 ### 6.4.1 Как работает интернет или Модель OSI
-#### Уровни
+#### Уровни OSI
 1. - Физический - железо + драйверы
      Кодирование декодирование сигнала
 2. - Канальный - MAC, физическая адресация устройств
@@ -2216,4 +2216,93 @@ func HTTPClientHeadersGet() {
 		panic(err)
 	}
 }
-##
+## 6.5 Протоколы обмена
+### Json Marshal
+#### 6.5.1 Theory Маршалинг
+Маршалинг - конвертация данных в передаваемый формат
+Анмаршалинг - разворачивание данных после маршалинга
+#### 6.5.3 JSON - javaScript object notation
+##### https://jsonformatter.curiousconcept.com/
+##### Json Unmarshal simple
+type Dimensions struct {
+	Height int
+	Width  int
+}
+
+type Bird struct {
+	Species     string
+	Description string
+	Dimensions  Dimensions
+}
+
+func ParseJson() {
+	birdJson := `{"species":"pigeon","description":"likes to perch onrocks", "dimensions":{"height":24,"width":10}}`
+	var bird Bird
+	err := json.Unmarshal([]byte(birdJson), &bird)
+
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(bird)
+}
+##### Json Marshal simple
+func CreateJson() {
+	bird := Bird{
+		Species:     "Eagle",
+		Description: "Cool eagle",
+		Dimensions: Dimensions{
+			Height: 100,
+			Width:  50,
+		},
+	}
+	//data, _ := json.Marshal(bird) //форматировать в строчку
+	data, _ := json.MarshalIndent(bird, "", "    ") //форматирует читабельно
+	fmt.Println(string(data))
+}
+##### My simple json
+type Person struct {
+	Name     string `json:"pogonjalo"`
+	LastName string `json:"lastName"`
+	Age      int    `json:"years"`
+}
+
+func TakeJson(doc string) ([]Person, bool) {
+	var person []Person
+	jsonData, err := os.ReadFile(doc)
+	if err != nil {
+		fmt.Println(err)
+		return person, false
+	}
+	json.Unmarshal(jsonData, &person)
+	return person, true
+}
+
+// Устаревший подход
+func TakeJsonOpen(doc string) ([]Person, bool) {
+	jsonFile, err := os.Open(doc)
+	var person []Person
+	if err != nil {
+		fmt.Println(err)
+		return person, false
+	}
+	defer jsonFile.Close()
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+		return person, false
+	}
+	json.Unmarshal(byteValue, &person)
+	return person, true
+}
+
+// Marshaling
+
+func WriteJson(doc string, db []Person) {
+	byteArr, _ := json.MarshalIndent(db, "", "    ")
+	err := os.WriteFile(doc, byteArr, 0666) //-rw-rw-rw-
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+#### 6.5.5 
