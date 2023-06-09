@@ -14,11 +14,12 @@ func sendResponse(conn *net.UDPConn, addr *net.UDPAddr) {
 }
 
 func UDPServer() {
-
+	//Можно структуркой где ip и порт
 	addr := net.UDPAddr{
 		Port: 1234,
 		IP:   net.ParseIP("127.0.0.1"),
 	}
+	//
 	ser, err := net.ListenUDP("udp", &addr)
 
 	if err != nil {

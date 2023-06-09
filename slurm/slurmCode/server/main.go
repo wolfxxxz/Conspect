@@ -7,5 +7,7 @@ import (
 func main() {
 	//servers.TCPServer()
 
-	servers.UDPServer()
+	//servers.UDPServer()
+
+	servers.HTTPServer()
 }

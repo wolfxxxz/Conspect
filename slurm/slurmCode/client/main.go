@@ -6,6 +6,9 @@ func main() {
 
 	//client.TCPClient()
 
-	client.UDPClient()
+	//client.UDPClient()
+
+	client.HTTPClientSimpleGet()
+	client.HTTPClientHeadersGet()
 
 }

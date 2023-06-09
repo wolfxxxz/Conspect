@@ -1974,6 +1974,9 @@ func check(e error) {
 7. - Прикладной - HTTP, Telnet, SMTP
      Работа с прикладными клиентами
 ### 6.4.3 TCP & UDP - Транспортный уровень (только отправка и получение)
+#### Theory 
+Transmission Control Protocol
+User Datagram Protocol (Unreliable)
 - Оба транспортных протокола содержат данные
 - Делят данные на пакеты для передачи по сети
 - Работают на уровне конкретных машин
@@ -1985,7 +1988,7 @@ func check(e error) {
  Медленный                   || быстрый
  Используют в ЭП, загрузке   || Стриминг видео
  файлов, API                 || VoIP
-#### TCP Протокол с подтверждением
+#### TCP Протокол с подтверждением (use Hercules SETUP utility by HW-group.com & Windows)
 ##### TCP Server code
 **https://www.hw-group.com/software/hercules-setup-utility**
 func main() {
@@ -2002,7 +2005,7 @@ func TCPServer() {
 		os.Exit(1)
 	}
 
-	//если не закрыть приложение то прийдётся искать этот
+	//если не закрыть приложение то придётся искать этот
 	//процесс и убивать его принудительно
 	//будет висеть в hook (петля) и кушать ресурсы
 	defer l.Close()
@@ -2064,7 +2067,7 @@ func TCPClient() {
 	}
 	conn.Close()
 }
-#### UDP Протокол (быстрый) но беззащитный
+#### UDP Протокол (быстрый) но беззащитный (use Hercules SETUP utility by HW-group.com & Windows)
 ##### UDP Server
 // Если пришло сообщение кинуть назад ответ
 func sendResponse(conn *net.UDPConn, addr *net.UDPAddr) {
@@ -2097,6 +2100,8 @@ func UDPServer() {
 			continue
 		}
 		go sendResponse(ser, remoteaddr)
+		// Напечатать сообщение и
+		// закрыть сервер:)
 		if len(p) != 0 {
 			fmt.Println(string(p))
 			break
@@ -2122,6 +2127,93 @@ func UDPClient() {
 	}
 	conn.Close()
 }
+### 6.4.5 HTTP Прикладной уровень
+#### Theory
+HTTP - 90 % сайтов используют именно его
+Имеет несколько версий(1.1,2,3) - 1.1 и 2 используют за основу tcp, 3 версия имеет свой протокол QUICK
+Протокол запрос ответ
+Используется в большинстве Api в интернете
+- есть статус коды
+- get put delete post(update)
+- heders 
+#### HTTP server (use insomnia & Windows)
+func hello(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "hello\n")
+}
+
+func headers(w http.ResponseWriter, req *http.Request) {
+	for name, headers := range req.Header {
+		for _, h := range headers {
+			fmt.Fprintf(w, "%v: %v\n", h, name)
+		}
+	}
+}
+
+func HTTPServer() {
+	http.HandleFunc("/hello", hello)
+	http.HandleFunc("/headers", headers)
+
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+//insomnia
+get http://localhost:8080/hello
+answer - hello
+get http://localhost:8080/headers
+answer - insomnia/2023.2.2: User-Agent
+         */*: Accept
+get http://localhost:8080/got
+answer - 404 page not found
+#### HTTPs server (security защищённый)
+func http.ListenAndServeTLS(addr string, certFile string, keyFile string, handler http.Handler) error
+
+- работает на основе приватный и публичный ключи
+- дальше сами ищите ключи...
+#### HTTP client
+func HTTPClientSimpleGet() {
+	resp, err := http.Get("http://localhost:8080/hello")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Response status", resp.Status)
+
+	scanner := bufio.NewScanner(resp.Body)
+	for i := 0; scanner.Scan() && i < 5; i++ {
+		fmt.Println(scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+}
+
+func HTTPClientHeadersGet() {
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", "http://localhost:8080/headers", nil)
+	req.Header.Add("test", "test")
+	resp, err := client.Do(req)
+	//resp,err := http.Get("http:/localhost:8080/headers")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	for name, headers := range resp.Header {
+		for _, h := range headers {
+			fmt.Printf("H: %v : %v\n", name, h)
+		}
+	}
+	fmt.Println("Response status:", resp.Status)
+
+	scanner := bufio.NewScanner(resp.Body)
+	for i := 0; scanner.Scan() && i < 5; i++ {
+		fmt.Println(scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+}
 ##
-
-
