@@ -1,0 +1,24 @@
+definitions:
+  step:
+  - step:
+      artifacts:
+      - target/**
+      name: Build and test
+      script:
+      - mvn package
+pipelines:
+  branches:
+    develop:
+    - step:
+        artifacts:
+        - target/**
+        name: Build and test
+        script:
+        - mvn package
+    main:
+    - step:
+        artifacts:
+        - target/**
+        name: Build and test
+        script:
+        - mvn package

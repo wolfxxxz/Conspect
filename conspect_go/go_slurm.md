@@ -2305,4 +2305,254 @@ func WriteJson(doc string, db []Person) {
 		log.Fatal(err)
 	}
 }
-#### 6.5.5 
+### 6.5.5 XML Marshal
+#### Theory
+XML (МФА: [ˌeks.emˈel], аббр. от англ. eXtensible Markup Language) — «расширяемый язык разметки». Рекомендован Консорциумом Всемирной паутины (W3C). Спецификация XML описывает XML-документы и частично описывает поведение XML-процессоров (программ, читающих XML-документы и обеспечивающих доступ к их содержимому). XML разрабатывался как язык с простым формальным синтаксисом, удобный для создания и обработки документов как программами, так и человеком, с акцентом на использование в Интернете. Язык называется расширяемым, поскольку он не фиксирует разметку, используемую в документах: разработчик волен создать разметку в соответствии с потребностями к конкретной области, будучи ограниченным лишь синтаксическими правилами языка. Расширение XML — это конкретная грамматика, созданная на базе XML и представленная словарём тегов и их атрибутов, а также набором правил, определяющих, какие атрибуты и элементы могут входить в состав других элементов. Сочетание простого формального синтаксиса, удобства для человека, расширяемости, а также базирование на кодировках Юникод для представления содержания документов привело к широкому использованию как, собственно, XML, так и множества производных специализированных языков на базе XML в самых разнообразных программных средствах.
+
+XML является подмножеством SGML.
+
+Файлы в формате XML используется при проектировании структуры программ, в частности, концептуальных карт и диаграмм связей,
+#### Exampl simple
+type Plant struct {
+	//Без поля xml.Name - ничего не будет
+	XMLName xml.Name `xml:"plant"`
+	Id      int      `xml:"id,attr"`
+	Name    string   `xml:"name"`
+	Origin  []string `xml:"origin"`
+}
+
+func (p Plant) String() string {
+	return fmt.Sprintf("Plant id=%v, name=%v, origin=%v", p.Id, p.Name, p.Origin)
+}
+
+func CreateXml() string {
+	coffee := &Plant{Id: 27, Name: "coffee"}
+	coffee.Origin = []string{"Ethiopia", "Brazil"}
+
+	out, _ := xml.MarshalIndent(coffee, "", "   ")
+	return string(out)
+}
+
+func DecodeXml(input string) {
+	var p Plant
+	if err := xml.Unmarshal([]byte(input), &p); err != nil {
+		panic(err)
+	}
+	fmt.Println(p)
+}
+#### Пропустить муссорные категории
+func NestedXml() {
+
+	tomato := &Plant{Id: 01, Name: "tomato"}
+	tomato.Origin = []string{"Mexico", "California"}
+
+	coffee := &Plant{Id: 27, Name: "Coffee"}
+	coffee.Origin = []string{"Ethiopia", "Brazil"}
+
+	type Nesting struct {
+		XMLName xml.Name `xml:"nesting"`
+		//Пропускаем parent>child> и записать в Plants = plant
+		Plants []*Plant `xml:"parent>child>plant"`
+	}
+
+	nesting := &Nesting{}
+	nesting.Plants = []*Plant{coffee, tomato}
+
+	out, _ := xml.MarshalIndent(nesting, "", "   ")
+	fmt.Println(string(out))
+
+	res := &Nesting{}
+
+	xml.Unmarshal(out, res)
+
+	fmt.Println(res)
+
+}
+#### Пример с os.ReadFile and os.WriteFile
+func (p Plant) String() string {
+	return fmt.Sprintf("Plant id=%v, name=%v, origin=%v", p.Id, p.Name, p.Origin)
+}
+
+type Plant struct {
+	//Без поля xml.Name - ничего не будет
+	XMLName xml.Name `xml:"plant"`
+	Id      int      `xml:"id,attr"`
+	Name    string   `xml:"name"`
+	Origin  []string `xml:"origin"`
+}
+type Nesting struct {
+	XMLName xml.Name `xml:"nesting"`
+	//Пропускаем parent>child> и записать в Plants = plant
+	Plants []*Plant `xml:"parent>child>plant"`
+}
+
+func WriteXml(file string) {
+	tomato := &Plant{Id: 01, Name: "tomato"}
+	tomato.Origin = []string{"Mexico", "California"}
+	coffee := &Plant{Id: 27, Name: "Coffee"}
+	coffee.Origin = []string{"Ethiopia", "Brazil"}
+	nesting := &Nesting{}
+	nesting.Plants = []*Plant{coffee, tomato}
+
+	out, _ := xml.MarshalIndent(nesting, "", "   ")
+	err := os.WriteFile(file, out, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("write out in %v\n", file)
+}
+
+func TakeXml(file string) {
+	res := &Nesting{}
+	xmlData, err := os.ReadFile(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	xml.Unmarshal(xmlData, res)
+	fmt.Println(res)
+}
+### 6.5.7 Yaml вместо скобок пробелы
+#### Theory and go get gopkg.in/yaml.v2
+YAML (рекурсивный акроним англ. «YAML Ain't Markup Language» — «YAML — не язык разметки») — дружественный формат сериализации данных, концептуально близкий к языкам разметки, но ориентированный на удобство ввода-вывода типичных структур данных многих языков программирования.
+
+В трактовке названия отражена история развития: на ранних этапах YAML расшифровывался как Yet Another Markup Language («Ещё один язык разметки») и даже позиционировался как конкурент XML, но позже был переименован с целью акцентировать внимание на данных, а не на разметке документов[6].
+#### ReadFile(.yml)
+type Conf struct {
+	Hits int64 `yaml:"hits"`
+	Time int64 `yaml:"time"`
+}
+
+func GetConf(file string) {
+	config := &Conf{}
+	yamlFile, err := os.ReadFile(file)
+	if err != nil {
+		log.Printf("yamFile.Get err: %v", err)
+	}
+	err = yaml.Unmarshal(yamlFile, config)
+	if err != nil {
+		log.Fatalf("Unmarshal: %v", err)
+	}
+	fmt.Println(config)
+}
+#### WriteFile(.yml)
+func WriteYaml(file string) {
+	config := &Conf{Hits: 333, Time: 21212024}
+	out, _ := yaml.Marshal(config)
+
+	err := os.WriteFile(file, out, 0666)
+	if err != nil {
+		log.Printf("err WriteFile %v\n", err)
+	}
+}
+#### Example pipes (как развернуть yml)
+/*
+func main(){
+	config := &BuildConf{}
+	config.ReadBigConf("anchor_example.yml")
+	config.WriteBigConf("anchor_example2.yml")
+}
+*/
+/*file1.yml
+definitions:
+ step:
+ - step: &build-test
+    name: Build and test
+    script:
+      - mvn package
+    artifacts:
+      - target/**
+
+pipelines:
+  branches:
+    develop:
+      - step: *build-test
+    main:
+      - step: *build-test
+*/
+
+type BuildConf struct {
+	Definitions map[string]interface{} `yaml:"definitions"`
+	Pipelines   map[string]interface{} `yaml:"pipelines"`
+}
+
+func (config *BuildConf) ReadBigConf(file string) {
+
+	yamlFile, err := os.ReadFile(file)
+	if err != nil {
+		log.Printf("ReadFile %v", err)
+	}
+	err = yaml.Unmarshal(yamlFile, config)
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(config)
+}
+
+func (config *BuildConf) WriteBigConf(file string) {
+	out, _ := yaml.Marshal(config)
+	err := os.WriteFile(file, out, 0666)
+	if err != nil {
+		log.Printf("err WriteFile %v\n", err)
+	}
+}
+
+/*
+definitions:
+  step:
+  - step:
+      artifacts:
+      - target/**
+      name: Build and test
+      script:
+      - mvn package
+pipelines:
+  branches:
+    develop:
+    - step:
+        artifacts:
+        - target/**
+        name: Build and test
+        script:
+        - mvn package
+    main:
+    - step:
+        artifacts:
+        - target/**
+        name: Build and test
+        script:
+        - mvn package
+*/
+#### broke exampl it doesn't work *yaml.Node
+type SlicesTags []string *yaml.Node
+
+func (tags *SlicesTags) UnmarshalYAML(value *yaml.Node) error {
+	if value != nil {
+		*tags = strings.Split(value.Value, ",")
+	}
+	return nil
+}
+
+type Messages struct {
+	Tags SlicesTags `yaml:"tags"`
+}
+
+type Subs struct {
+	Messages Messages `yaml:"messages"`
+}
+
+func ParseYamlWithCustomStruct(file string) {
+	config := &Subs{}
+
+	yamlFile, err := os.ReadFile(file)
+	if err != nil {
+		log.Println("error Read", err)
+	}
+
+	err = yaml.Unmarshal(yamlFile, config)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(config)
+}
+###
