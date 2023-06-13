@@ -1792,7 +1792,7 @@ func main() {
 // abracadabra
 // PS C:\Users\Mvmir\go\src\github.com\Wolfxxxz\flag2> ./flag2.exe                  
 // 8080
-## 6.3 Работа с файлами в го
+## 6.3 Работа с файлами в го os.Open, os.Read, os.Seek, io.ReadAtLeast, bufio.NewReader, os.Close
 ### os.ReadFile(string)
 
 func read(filepath string) {
@@ -2216,7 +2216,7 @@ func HTTPClientHeadersGet() {
 		panic(err)
 	}
 }
-## 6.5 Протоколы обмена Json, xml, yml, gob, protobuf
+## 6.5 Протоколы обмена Json, xml, yml, gob, protobuf, .env, toml
 ### Json Marshal
 #### 6.5.1 Theory Маршалинг
 Маршалинг - конвертация данных в передаваемый формат
@@ -2655,7 +2655,60 @@ func ProtobufCase() {
 	fmt.Println(newElliot.GetAge())
 	fmt.Println(newElliot.GetName())
 }
-## 6.6 БД
+### .env
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+/*.env
+app_port = 8080
+path = get/go/next
+*/
+
+func GetEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Could not find .env file:", err)
+	}
+	port := os.Getenv("app_port") 
+	path := os.Getenv("path")
+	fmt.Println(port) //8080
+	fmt.Println(path) //get/go/next
+}
+### Toml 
+import (
+	"fmt"
+	"log"
+
+	"github.com/BurntSushi/toml"
+)
+
+/*api.toml
+bind_addr = ":8081"
+logger_level = "debug"
+*/
+
+type Addr struct {
+	BindAddr string `toml:"bind_addr"`
+	LogLevel string `toml:"logger_level"`
+}
+
+func ReadToml() {
+	adr := Addr{}
+	config := &adr
+	_, err := toml.DecodeFile("api.toml", config)
+	if err != nil {
+		log.Println("Can not find configs file. Using default value", err)
+	}
+
+	fmt.Println(config.BindAddr) //:8081
+	fmt.Println(config.LogLevel) //debug
+}
+## 6.6 БД 
 
 
 
