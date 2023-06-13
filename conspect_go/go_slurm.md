@@ -2709,6 +2709,73 @@ func ReadToml() {
 	fmt.Println(config.LogLevel) //debug
 }
 ## 6.6 БД 
+### Theory
+- Хранение данных
+- Реплицирование и избыточность (облака и копии)
+- Обеспечение доступа к данным
+- Логика хранения
+- Работа внутри сети
+**Типы БД**
+- Реляционные (sql, Oracle) - связанные
+- Документоориентированные (MongoDB, CouchDB) (коллекции)
+- Ключ значение (Redis, etcd, memcached)
+- Wide-column БД (Похожи на sql) но без связи с другими таблицами (Cassandra, Clickhouse - хуяндекс)
+- Поисковые (Elasticsearch, Splunk, Solr)
+- Графовые (Neo4i, Virtuoso, OrientDB) - типа семейное дерево
+- Time series (Prometheus, Influx, TimescaleDB)
+- Специального назначения (geomesa,qldb, spaceTime, SparcleDB) - узкоориентированные
+**Внимание всё разное**
+- Забор данных
+- Коммуникация
+- Концепция хранения
+## 6.6.3 Пакеты для подключения к бд (прошёл только sql и то не полностью)
+### Pgsql - pgx.Connect() 
+**очень скупой вариант от gpt**
+// в slurm много больше функций
+import (
+	"context"
+	"fmt"
+
+	"github.com/jackc/pgx/v4"
+)
+
+func pgsqlAndPgx() {
+	// Установите соединение с базой данных
+	conn, err := pgx.Connect(context.Background(), "your_connection_string")
+	if err != nil {
+		fmt.Println("Ошибка при подключении к базе данных:", err)
+		return
+	}
+	defer conn.Close(context.Background())
+
+	// Выполните запрос
+	rows, err := conn.Query(context.Background(), "SELECT * FROM user")
+	if err != nil {
+		fmt.Println("Ошибка при выполнении запроса:", err)
+		return
+	}
+	defer rows.Close()
+
+	// Обработайте результаты запроса
+	for rows.Next() {
+		var id int
+		var name string
+		err = rows.Scan(&id, &name)
+		if err != nil {
+			fmt.Println("Ошибка при сканировании результата:", err)
+			return
+		}
+		fmt.Println("ID:", id, "Name:", name)
+	}
+
+	if rows.Err() != nil {
+		fmt.Println("Ошибка при получении результатов:", rows.Err())
+		return
+	}
+}
+## 6.7 Создание приложения
+Awesome go - все рабочие пакеты в одном хорошом списке
+##
 
 
 
