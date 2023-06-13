@@ -2216,7 +2216,7 @@ func HTTPClientHeadersGet() {
 		panic(err)
 	}
 }
-## 6.5 Протоколы обмена
+## 6.5 Протоколы обмена Json, xml, yml, gob, protobuf
 ### Json Marshal
 #### 6.5.1 Theory Маршалинг
 Маршалинг - конвертация данных в передаваемый формат
@@ -2555,4 +2555,107 @@ func ParseYamlWithCustomStruct(file string) {
 	}
 	fmt.Println(config)
 }
-###
+### 6.5.9 GOB
+#### Theory
+GOB
+- бинарный протокол (читать невозможно)
+- очень быстро работает
+- без софта не работает
+- работает только на го + си
+#### Exampl 
+func GobExample() {
+	DecodeGob(EncodeGob())
+}
+
+func EncodeGob() []byte {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	m := make(map[string]string)
+	m["foo"] = "bar"
+
+	if err := enc.Encode(m); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(buf.Bytes()) //[14 255 129 4 1 2 255 130 0 1 12 1 12 0 0 12 255 130 0 1 3 102 111 111 3 98 97 114]
+
+	return buf.Bytes()
+}
+
+func DecodeGob(input []byte) {
+	buf := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buf)
+
+	m := make(map[string]string)
+	if err := dec.Decode(&m); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(m["foo"])
+}
+### 6.5.10 Protobuf
+#### Theory 
+- Бинарный протокол
+- Работает очень быстро
+- Не может читатся без доп софта
+- Имеет схему для валидации сообщений
+- Можно встроить в любой язык
+**Приминение**
+довольно узкое в основном внутреннее из за обязательного наличиея метрик полей на обеих сторонах
+#### Install ubuntu
+sudo apt-get install protobuf-compiler
+sudo apt-get install libprotobuf-dev
+go get github.com/golang/protobuf/protoc-gen-go
+sudo apt  install golang-goprotobuf-dev
+#### Настройка type
+//Файл person.proto
+/*
+syntax="proto3";
+
+option go_package = "Protobuf/gen;gen";
+
+message Person {
+	string name = 1;
+	int32 age = 2;
+}
+*/
+protoc person.proto --go_out=.
+// будет настроин файл Protobuf/gen/person.pb.go
+#### Кодировка которая не работает хз
+package main
+
+import (
+	"Protobuf/Protobuf/gen"
+	"fmt"
+	"log"
+
+	"google.golang.org/protobuf/proto"
+)
+
+func ProtobufCase() {
+
+	elliot := gen.Person{
+		Name: "Elliot",
+		Age:  24,
+	}
+
+	elliot.ProtoMessage()
+	// Не работает
+	data, err := proto.Marshal(elliot)
+	if err != nil {
+		log.Fatal("Marshalling error")
+	}
+	fmt.Println(data)
+	newElliot := &gen.Person{}
+	err = proto.Unmarshal(data, newElliot)
+	if err != nil {
+		log.Fatal("unmarshalling error", err)
+	}
+
+	fmt.Println(newElliot.GetAge())
+	fmt.Println(newElliot.GetName())
+}
+## 6.6 БД
+
+
+
