@@ -2540,9 +2540,806 @@ type Describable interface {
 	GetCategory() string
 	ItemForSale
 }
-# 14 # Горутины и каналы
+# 14  Горутины и каналы
 ## Определения 
 Горутины — это легкие потоки, созданные и управляемые средой выполнения Go. Каналы — это конвейеры, передающие значения определенного типа.
+## Простой пример
+ИСПОЛЬЗОВАНИЕ АДАПТЕРОВ ДЛЯ АСИНХРОННОГО ВЫПОЛНЕНИЯ ФУНКЦИЙ
+Не всегда возможно переписать существующие функции или методы для использования каналов, но асинхронно выполнять синхронные функции в оболочке несложно, например:
+...
+calcTax := func(price float64) float64 {
+    return price + (price * 0.2)
+}
+wrapper := func (price float64, c chan float64)  {
+    c <- calcTax(price)
+}
+resultChannel := make(chan float64)
+go wrapper(275, resultChannel)
+result := <- resultChannel
+fmt.Println("Result:", result)
+...
+Функция wrapper получает канал, который используется для синхронной отправки значения, полученного при выполнении функции calcTax. Это можно выразить более кратко, определив функцию, не присваивая ее переменной, например:
+...
+go func (price float64, c chan float64) {
+    c <- calcTax(price)
+}(275, resultChannel)
+...
+Синтаксис немного неудобен, потому что аргументы, используемые для вызова функции, выражаются сразу после определения функции. Но результат тот же: синхронная функция может быть выполнена горутиной, а результат будет отправлен через канал.
+## chan len and cap
+cap(ch)
+- размер буфера канала с помощью встроенной функции cap 
+**Размер буфера будет сталый**
+len(ch)
+- количество значений в буфере с помощью функции len
+**только в буфере со значениями внутри**
+### Exampl simple
+func calc(num int, ch chan int) {
+	fmt.Println("len empty chan ", len(ch))
+	f := num * 2
+	ch <- f
+	fmt.Println("len ch = ", len(ch))
+}
+func main() {
+	ch := make(chan int, 2)
+	fmt.Println("len(ch):", len(ch), " cap(ch):", cap(ch))
+	for i := 1; i < 4; i++ {
+		go calc(i, ch)
+	}
+	go func() {
+
+		for v := range ch {
+			fmt.Println(v)
+		}
+
+	}()
+
+	time.Sleep(time.Second * 3)
+}
+### Exampl two chan and one select
+**select будет выбирать канал пока канал не станет равен nil**
+//chInt = nil
+func getInt(ch chan int) {
+	for i := 1; i < 5; i++ {
+		ch <- i
+		time.Sleep(time.Millisecond * 800)
+	}
+	close(ch)
+	fmt.Println("getInt Done")
+}
+
+func getStr(ch chan string) {
+	ArrString := []string{"hi", "tue", "something", "nothing"}
+	for _, strok := range ArrString {
+		ch <- strok
+		time.Sleep(time.Millisecond * 800)
+	}
+	close(ch)
+	fmt.Println("getString Done")
+}
+
+func main() {
+	chInt := make(chan int, 2)
+	go getInt(chInt)
+
+	chStr := make(chan string, 2)
+	go getStr(chStr)
+
+	openCh := 2
+
+	for {
+		select {
+		case num, ok := <-chInt:
+			if ok {
+				fmt.Println(num)
+			} else {
+				fmt.Println("int channel has been closed")
+				chInt = nil
+				openCh--
+			}
+		case strok, ok := <-chStr:
+			if ok {
+				fmt.Println(strok)
+			} else {
+				fmt.Println("string channel has been closed")
+				chStr = nil
+				openCh--
+			}
+		default:
+			if openCh == 0 {
+				fmt.Println("All channels are closed")
+				goto allDone
+			}
+
+			time.Sleep(time.Millisecond * 500)
+		}
+	}
+allDone:
+	fmt.Println("everithing is the end")
+}
+### Exampl select sent ch<- num
+func getStr(ch chan<- string) {
+	ArrString := []string{"hi", "tue", "something", "nothing"}
+	for _, strok := range ArrString {
+		select {
+		case ch <- strok:
+			fmt.Println("sent string", strok)
+		default:
+			fmt.Println("Discard string", strok)
+			time.Sleep(time.Millisecond * 800)
+		}
+	}
+	close(ch)
+	fmt.Println("getString Done")
+}
+func getInt(ch chan int) {
+	for i := 1; i < 5; i++ {
+		ch <- i
+		time.Sleep(time.Millisecond * 800)
+	}
+	close(ch)
+	fmt.Println("getInt Done")
+}
+
+func main() {
+	chInt := make(chan int, 2)
+	go getInt(chInt)
+
+	chStr := make(chan string, 2)
+	go getStr(chStr)
+
+	openCh := 2
+
+	for {
+		select {
+		case num, ok := <-chInt:
+			if ok {
+				fmt.Println(num)
+			} else {
+				fmt.Println("int channel has been closed")
+				chInt = nil
+				openCh--
+			}
+		case strok, ok := <-chStr:
+			if ok {
+				fmt.Println(strok)
+			} else {
+				fmt.Println("string channel has been closed")
+				chStr = nil
+				openCh--
+			}
+		default:
+			if openCh == 0 {
+				fmt.Println("All channels are closed")
+				goto allDone
+			}
+
+			time.Sleep(time.Millisecond * 500)
+		}
+	}
+allDone:
+	fmt.Println("everithing is the end")
+}
+# 15 err Пропустил
+# 16.1 String пакеты strings, unicode, levenshtein
+## strings
+### strings compare
+import (
+	"fmt"
+	"strings"
+)
+
+func packageStrings() {
+	product := "Kayak"
+	//Эта функция возвращает true, если строка s содержит substr, и false, если нет.
+	fmt.Println("Contains:", strings.Contains(product, "yak"))
+	//Эта функция возвращает true, если строка s содержит любой из символов,
+	//содержащихся в строке substr.
+	fmt.Println("ContainsAny:", strings.ContainsAny(product, "abc"))
+	//Эта функция возвращает true, если строка s содержит определенную руну (rune).
+	fmt.Println("ContainsRune:", strings.ContainsRune(product, 'K'))
+	//Эта функция выполняет сравнение без учета регистра и возвращает
+	//true, если строки s1 и s2 совпадают.
+	fmt.Println("EqualFold:", strings.EqualFold(product, "KAYAK"))
+	//Эта функция возвращает значение true, если строка s начинается с префикса (prefix) строки.
+	fmt.Println("HasPrefix:", strings.HasPrefix(product, "Ka"))
+	//Эта функция возвращает значение true, если строка заканчивается суффиксом (suffix) строки.
+	fmt.Println("HasSuffix:", strings.HasSuffix(product, "yak"))
+}
+### strings convert
+import (
+	"fmt"
+	"strings"
+)
+
+func Convert() {
+	str := "HeLLo"
+	//возвращает новую строку, содержащую символы указанной строки, преобразованные в нижний регистр.
+	fmt.Println("strings.ToLower ", str, "-> ", strings.ToLower(str))
+	//преобразованные в нижний регистр.
+	fmt.Println("strings.ToLoUpper ", str, "-> ", strings.ToUpper(str))
+	str1 := "hello i am john"
+	//первый символ каждого слова был в верхнем регистре, а остальные символы — в нижнем
+	fmt.Println("strings.Title ", str1, "-> ", strings.Title(str1))
+	//все в верхний регистр
+	fmt.Println("strings.ToTitle ", str1, "-> ", strings.ToTitle(str1))
+}
+### проверка строк
+Count(s, sub)
+Эта функция возвращает int, которое сообщает, сколько раз указанная подстрока встречается в строке s.
+Index(s, sub)
+LastIndex(s, sub)
+Эти функции возвращают индекс первого или последнего вхождения указанной строки подстроки в строке s или -1, если вхождения нет.
+IndexAny(s, chars)
+LastIndexAny(s, chars)
+Эти функции возвращают первое или последнее вхождение любого символа в указанной строке в пределах строки s или -1, если вхождения нет.
+IndexByte(s, b)
+LastIndexByte(s, b)
+Эти функции возвращают индекс первого или последнего вхождения указанного byte в строке s или -1, если вхождения нет.
+IndexFunc(s, func)
+LastIndexFunc(s, func)
+Эти функции возвращают индекс первого или последнего вхождения символа в строку s, для которого указанная функция возвращает значение true, как описано в разделе «Проверка строк с помощью пользовательских функций».
+### strings manipulate
+#### Theory
+**Fields(s)**
+Эта функция разбивает строку на пробельные символы и возвращает срез, содержащий непробельные разделы строки s.
+FieldsFunc(s, func)
+Эта функция разбивает строку s на символы, для которых пользовательская функция возвращает значение true, и возвращает срез, содержащий оставшиеся части строки.
+**Split(s, sub)** - разбивает строку s на срез []string, возвращая string срез. 
+SplitN(s, sub, max)
+Эта функция похожа на Split, но принимает дополнительный аргумент типа int, указывающий максимальное количество возвращаемых подстрок. Последняя подстрока результирующего среза будет содержать неразделенную часть исходной строки.
+SplitAfter(s, sub)
+Эта функция похожа на Split, но включает подстроку, используемую в результатах. См. текст после таблицы для демонстрации.
+SplitAfterN(s, sub, max)
+Эта функция похожа на SplitAfter, но принимает дополнительный аргумент типа int, указывающий максимальное количество возвращаемых подстрок.
+#### Example Split(), SplitAfter, Field, TrimSpace
+**а если пробелов больше чем один?**
+func Manipulate() {
+	description := "  A  boat  for  "
+	// Разбивает на строки при этом чистит пробелы и пустые строки
+	field := strings.Fields(description)
+	for i, x := range field {
+		field[i] = ">" + x + "<"
+	}
+	fmt.Println("strings.Fields", field) //[>A< >boat< >for<]
+
+	//Разбивает на строки чистит пробелы
+	// - оставляет пустые строки
+	splits := strings.Split(description, " ")
+	for i, x := range splits {
+		splits[i] = ">" + x + "<"
+	}
+	fmt.Println("strings.Split", splits) //[>< >< >A< >< >boat< >< >for< >< ><]
+
+	//Делит слова но ...
+	//Оставляет все пробелы
+	splitsAfter := strings.SplitAfter(description, " ")
+	for i, x := range splitsAfter {
+		splitsAfter[i] = ">" + x + "<"
+	}
+	fmt.Println("strings.SplitAfter", splitsAfter) //[> < > < >A < > < >boat < > < >for < > < ><]
+	//Чистит пробелы перед и после
+	//Но не внутри
+	trimSpase := strings.TrimSpace(description)
+	trimSpase = ">" + trimSpase + "<"
+	fmt.Println("strings.TrimSpace", trimSpase) //>A  boat  for<
+}
+## github.com/agnivade/levenshtein
+import (
+	"fmt"
+	"strings"
+
+	"github.com/agnivade/levenshtein"
+)
+
+func compareStringsLevenshtein(str1, str2 string) bool {
+	str1 = strings.ToLower(str1)
+	str2 = strings.ToLower(str2)
+
+	if distance := levenshtein.ComputeDistance(str1, str2); distance <= 2 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func main() {
+	str1 := "приет"
+	str2 := "приве"
+	result := compareStringsLevenshtein(str1, str2)
+	fmt.Println(result) // Выводит: true
+}
+## unicode rune (string(str[0])
+IsLower(rune)
+Эта функция возвращает true, если указанная руна в нижнем регистре.
+ToLower(rune)
+Эта функция возвращает строчную руну, связанную с указанной руной.
+IsUpper(rune)
+Эта функция возвращает значение true, если указанная руна написана в верхнем регистре.
+ToUpper(rune)
+Эта функция возвращает верхнюю руну, связанную с указанной руной.
+IsTitle(rune)
+Эта функция возвращает true, если указанная руна является заглавной.
+ToTitle(rune)
+Эта функция возвращает руну в заглавном регистре, связанную с указанной руной.
+### example
+func Unicode() {
+	str := "Ri"
+	//Эта функция возвращает true, если указанная руна в нижнем регистре.
+	fmt.Println(string(str[0]), unicode.IsLower([]rune(str)[0]), string(str[1]), unicode.IsLower([]rune(str)[1]))
+	// Эта функция возвращает строчную руну, связанную с указанной руной.
+	fmt.Println(string(str[0]), unicode.ToLower([]rune(str)[0]))
+	//Эта функция возвращает значение true, если указанная руна написана в верхнем регистре.
+	fmt.Println(string(str[0]), unicode.IsUpper([]rune(str)[0]), string(str[1]), unicode.IsUpper([]rune(str)[1]))
+}
+## Разделение строк функции
+### Theory
+TrimSpace(s)
+Эта функция возвращает строку s без начальных и конечных пробельных символов.
+Trim(s, set)
+Эта функция возвращает строку, из которой удаляются все начальные или конечные символы, содержащиеся в наборе (set) строк, из строки s.
+TrimLeft(s, set)
+Эта функция возвращает строку s без какого-либо начального символа, содержащегося в наборе (set) строк. Эта функция соответствует любому из указанных символов — используйте функцию TrimPrefix для удаления полной подстроки.
+TrimRight(s, set)
+Эта функция возвращает строку s без каких-либо завершающих символов, содержащихся в наборе (set) строк. Эта функция соответствует любому из указанных символов — используйте функцию TrimSuffix для удаления полной подстроки.
+TrimPrefix(s, prefix)
+Эта функция возвращает строку s после удаления указанной строки префикса. Эта функция удаляет всю строку префикса (prefix) — используйте функцию TrimLeft для удаления символов из набора.
+TrimSuffix(s, suffix)
+Эта функция возвращает строку s после удаления указанной строки суффикса (suffix). Эта функция удаляет всю строку суффикса — используйте функцию TrimRight для удаления символов из набора.
+TrimFunc(s, func)
+Эта функция возвращает строку s, из которой удаляются все начальные или конечные символы, для которых пользовательская функция возвращает значение true.
+TrimLeftFunc(s, func)
+Эта функция возвращает строку s, из которой удаляются все начальные символы, для которых пользовательская функция возвращает значение true.
+TrimRightFunc(s, func)
+Эта функция возвращает строку s, из которой удаляются все завершающие символы, для которых пользовательская функция возвращает значение true.
+### Example strings.FieldsFunc
+func StringsFieldsFunc() {
+	description := "This  is  double  spaced"
+	splitter := func(r rune) bool {
+		return r == ' '
+	}
+	splits := strings.FieldsFunc(description, splitter)
+	for _, x := range splits {
+		fmt.Println("Field >>" + x + "<<")
+	}
+}
+## Обрезка подстрок
+func main() {
+    description := "A boat for one person"
+    prefixTrimmed := strings.TrimPrefix(description, "A boat ")
+    wrongPrefix := strings.TrimPrefix(description, "A hat ")
+    fmt.Println("Trimmed:", prefixTrimmed)
+    fmt.Println("Not trimmed:", wrongPrefix)
+}
+## Изминение строк (замена строк)
+### Theory
+Replace(s, old, new, n)
+Эта функция изменяет строку s, заменяя вхождения строки old на строку new. Максимальное количество заменяемых вхождений определяется аргументом int n.
+ReplaceAll(s, old, new)
+Эта функция изменяет строку s, заменяя все вхождения строки old строкой new. В отличие от функции Replace, количество заменяемых вхождений не ограничено.
+Map(func, s)
+Эта функция генерирует строку, вызывая пользовательскую функцию для каждого символа в строке s и объединяя результаты. Если функция выдает отрицательное значение, текущий символ отбрасывается без замены.
+**metods**
+Replace(s)
+Этот метод возвращает строку, для которой все замены, указанные в конструкторе, были выполнены в строке s.
+WriteString(writer, s)
+Этот метод используется для выполнения замен, указанных в конструкторе, и записи результатов в io.Writer, описанный в главе 20
+### Example Replace
+func Replacer() {
+	text := "It was a boat. A small boat."
+	replacer := strings.NewReplacer("boat", "kayak", "small", "huge", "It", "He")
+	replaced := replacer.Replace(text)
+	fmt.Println("Replaced:", replaced) //He was a kayak. A huge kayak.
+}
+### replase func(){}()
+//убираем все пробелы и точки
+func() {
+	replacer := strings.NewReplacer(" ", "", ".", "")
+	words[i] = replacer.Replace(v)
+}()
+## Построение и генерация строк
+Join(slice, sep)
+Эта функция объединяет элементы в указанном срезе строки с указанной строкой-разделителем, помещенной между элементами.
+Repeat(s, count)
+Эта функция генерирует строку, повторяя строку s указанное количество раз.
+## Строительные строки
+WriteString(s)
+Этот метод добавляет строку s к строящейся строке.
+WriteRune(r)
+Этот метод добавляет символ r к строящейся строке.
+WriteByte(b)
+Этот метод добавляет байт b к строящейся строке.
+String()
+Этот метод возвращает строку, созданную компоновщиком.
+Reset()
+Этот метод сбрасывает строку, созданную построителем.
+Len()
+Этот метод возвращает количество байтов, используемых для хранения строки, созданной компоновщиком.
+Cap()
+Этот метод возвращает количество байтов, выделенных компоновщиком.
+Grow(size)
+Этот метод увеличивает количество байтов, используемых компоновщиком для хранения строящейся строки.
+# 16.2 string regexp
+## Регулярные выражения
+### Что такое регулярные выражения от GPT
+Регулярные выражения (Regular Expressions) - это мощный инструмент для работы с текстом. Они представляют собой шаблоны или строки символов, которые используются для поиска и сопоставления определенных паттернов в тексте.
+
+Регулярные выражения могут быть использованы для различных задач, таких как:
+
+Поиск: Они позволяют найти все вхождения определенного паттерна в тексте. Например, можно найти все email-адреса или ссылки в тексте.
+
+Валидация: Регулярные выражения могут использоваться для проверки, соответствует ли строка определенным правилам. Например, можно проверить, является ли строка допустимым номером телефона или почтовым индексом.
+
+Замена: Регулярные выражения позволяют заменять определенные паттерны в тексте на другие строки. Например, можно заменить все вхождения одного слова на другое.
+
+Разделение: Можно использовать регулярные выражения для разделения строки на подстроки на основе определенного разделителя или паттерна.
+### теория
+#### Func
+Match(pattern, b)
+Эта функция возвращает bool значение, указывающее, соответствует ли шаблон байтовому срезу b.
+MatchString(patten, s)
+Эта функция возвращает bool значение, указывающее, соответствует ли шаблон строке s.
+Compile(pattern)
+Эта функция возвращает RegExp, который можно использовать для повторного сопоставления с указанным шаблоном, как описано в разделе «Компиляция и повторное использование шаблонов».
+MustCompile(pattern)
+Эта функция предоставляет те же возможности, что и Compile, но вызывает панику, как описано в главе 15, если указанный шаблон не может быть скомпилирован.
+#### metods
+MatchString(s)
+Этот метод возвращает true, если строка s соответствует скомпилированному шаблону.
+FindStringIndex(s)
+Этот метод возвращает int срез, содержащий расположение самого левого совпадения, сделанного скомпилированным шаблоном в строке s. Результат nil означает, что совпадений не было.
+FindAllStringIndex(s, max)
+Этот метод возвращает срез int срезов, содержащих расположение всех совпадений, сделанных скомпилированным шаблоном в строке s. Результат nil означает, что совпадений не было.
+FindString(s)
+Этот метод возвращает строку, содержащую самое левое совпадение, сделанное скомпилированным шаблоном в строке s. Пустая строка будет возвращена, если совпадений нет.
+FindAllString(s, max)
+Этот метод возвращает срез строки, содержащий совпадения, сделанные скомпилированным шаблоном в строке s. Аргумент int max указывает максимальное количество совпадений, а -1 указывает отсутствие ограничения. Если совпадений нет, возвращается nil результат.
+Split(s, max)
+Этот метод разбивает строку s, используя совпадения из скомпилированного шаблона в качестве разделителей, и возвращает срез, содержащий разделенные подстроки.
+### Example MatchString
+func MatchString() {
+	description := "A boat for one person"
+	// Ищем oat в тексте
+	match, err := regexp.MatchString("[A-z]oat", description)
+	if err == nil {
+		fmt.Println("Match:", match) //true
+	} else {
+		fmt.Println("Error:", err)
+	}
+}
+### Compile - теперь можно юзать методы
+func Compile() {
+	//Задали паттерн "[A-z]oat"
+	pattern, compileErr := regexp.Compile("[A-z]oat")
+	description := "A boat for one person"
+	question := "Is that a goat?"
+	preference := "I like oats"
+	if compileErr == nil {
+		fmt.Println("Description:", pattern.MatchString(description))
+		fmt.Println("Question:", pattern.MatchString(question))
+		fmt.Println("Preference:", pattern.MatchString(preference))
+	} else {
+		fmt.Println("Error:", compileErr)
+	}
+}
+### MustCompile + metod
+func getSubstring(s string, indices []int) string {
+	return string(s[indices[0]:indices[1]])
+}
+
+func CompileMetod() {
+	pattern := regexp.MustCompile("K[a-z]{4}|[A-z]oat")
+	description := "Kayak. A boat for one person."
+	firstIndex := pattern.FindStringIndex(description)
+	allIndices := pattern.FindAllStringIndex(description, -1)
+	fmt.Println("First index", firstIndex[0], "-", firstIndex[1],
+		"=", getSubstring(description, firstIndex))
+	for i, idx := range allIndices {
+		fmt.Println("Index", i, "=", idx[0], "-",
+			idx[1], "=", getSubstring(description, idx))
+	}
+}
+### MustCompile and return string
+func MustCompiler() {
+	pattern := regexp.MustCompile("K[a-z]{4}|[A-z]oat")
+	description := "Kayak. A boat for one person."
+	firstMatch := pattern.FindString(description)
+	allMatches := pattern.FindAllString(description, -1)
+	fmt.Println("First match:", firstMatch)
+	for i, m := range allMatches {
+		fmt.Println("Match", i, "=", m)
+	}
+}
+### MustCompAnd and regular expression возвращает string от точки до точки
+func MustCompileAndRegExp() {
+	pattern := regexp.MustCompile("A [A-z]* for [A-z]* person")
+	description := "Kayak. A boat for one person."
+	str := pattern.FindString(description)
+	fmt.Println("Match:", str)
+}
+## Подвыражения regexp.MustCompile
+### Theory
+FindStringSubmatch(s)
+Этот метод возвращает срез, содержащий первое совпадение, сделанное шаблоном, и текст для подвыражений, определяемых шаблоном.
+FindAllStringSubmatch(s, max)
+Этот метод возвращает срез, содержащий все совпадения и текст подвыражений. Аргумент int используется для указания максимального количества совпадений. Значение -1 указывает все совпадения.
+FindStringSubmatchIndex(s)
+Этот метод эквивалентен FindStringSubmatch, но возвращает индексы, а не подстроки.
+FindAllStringSubmatchIndex(s, max)
+Этот метод эквивалентен FindAllStringSubmatch, но возвращает индексы, а не подстроки.
+NumSubexp()
+Этот метод возвращает количество подвыражений.
+SubexpIndex(name)
+Этот метод возвращает индекс подвыражения с указанным именем или -1, если такого подвыражения нет.
+SubexpNames()
+Этот метод возвращает имена подвыражений, выраженные в том порядке, в котором они определены.
+### Example
+func main() {
+    pattern := regexp.MustCompile("A ([A-z]*) for ([A-z]*) person")
+    description := "Kayak. A boat for one person."
+    subs := pattern.FindStringSubmatch(description)
+    for _, s := range subs {
+        fmt.Println("Match:", s)
+    }
+}
+### Именованые подвыражения с подвыподвертом
+func CompAndPodv() {
+	pattern := regexp.MustCompile("A (?P<type>[A-z]*) for (?P<capacity>[A-z]*) person")
+	description := "Kayak. A boat for one person."
+	subs := pattern.FindStringSubmatch(description)
+	for _, name := range []string{"type", "capacity"} {
+		fmt.Println(name, "=", subs[pattern.SubexpIndex(name)])
+	}
+}
+## Замена подстрок и регулярные выражения
+### Theory
+ReplaceAllString(s, template)
+Этот метод заменяет совпадающую часть строки s указанным шаблоном, который расширяется перед включением в результат для включения подвыражений.
+ReplaceAllLiteralString(s, sub)
+Этот метод заменяет совпадающую часть строки s указанным содержимым, которое включается в результат без расширения для подвыражений.
+ReplaceAllStringFunc(s, func)
+Этот метод заменяет совпадающую часть строки s результатом, полученным указанной функцией..
+### Example
+func Replace() {
+	pattern := regexp.MustCompile("A (?P<type>[A-z]*) for (?P<capacity>[A-z]*) person")
+	description := "Kayak. A boat for one person."
+	template := "(type: ${type}, capacity: ${capacity})"
+	replaced := pattern.ReplaceAllString(description, template)
+	fmt.Println(replaced)
+}
+### Example and func
+func ReplaceFunc() {
+	pattern := regexp.MustCompile(
+		"A (?P<type>[A-z]*) for (?P<capacity>[A-z]*) person")
+	description := "Kayak. A boat for one person."
+	replaced := pattern.ReplaceAllStringFunc(description, func(s string) string {
+		return "This is the replacement content"
+	})
+	fmt.Println(replaced)
+}
+# 17 string fmt. Форматирование и сканирование строк
+## Theory Print
+Print(...vals)
+Эта функция принимает переменное количество аргументов и выводит их значения на стандартный вывод. Пробелы добавляются между значениями, которые не являются строками.
+Println(...vals)
+Эта функция принимает переменное количество аргументов и выводит их значения на стандартный вывод, разделенные пробелами и сопровождаемые символом новой строки.
+Fprint(writer, ...vals)
+Эта функция записывает переменное количество аргументов в указанный модуль записи, который я описываю в главе 20. Между значениями, не являющимися строками, добавляются пробелы.
+Fprintln(writer, ...vals)
+Эта функция записывает переменное количество аргументов в указанный модуль записи, который я описываю в главе 20, за которым следует символ новой строки. Между всеми значениями добавляются пробелы.
+### Пробелы 
+func main() {
+	fmt.Println("Product:", Kayak.Name, "Price:", Kayak.Price)
+	fmt.Print("Product:", Kayak.Name, "Price:", Kayak.Price, "\n")
+	fmt.Printf("Product: %v, Price: $%4.2f\n", Kayak.Name, Kayak.Price)
+}
+Product: Kayak Price: 275
+Product:KayakPrice:275
+Product: Kayak, Price: $275.00
+## Theory Sprint, Fprint, Errorf
+Sprintf(t, ...vals)
+Эта функция возвращает строку, созданную путем обработки шаблона t. Остальные аргументы используются в качестве значений для глаголов шаблона.
+Printf(t, ...vals)
+Эта функция создает строку, обрабатывая шаблон t. Остальные аргументы используются в качестве значений для глаголов шаблона. Строка записывается на стандартный вывод.
+Fprintf(writer, t, ...vals)
+Эта функция создает строку, обрабатывая шаблон t. Остальные аргументы используются в качестве значений для глаголов шаблона. Строка записывается в модуль Writer, который описан в главе 20.
+Errorf(t, ...values)
+Эта функция создает ошибку, обрабатывая шаблон t. Остальные аргументы используются в качестве значений для глаголов шаблона. Результатом является значение error, метод Error которого возвращает отформатированную строку.
+### errorf
+func main() {
+	err := fmt.Errorf("Error for index %v", 10)
+	fmt.Println(err.Error())
+}
+## Theory %v, %#v, %T Глаголы форматирования
+**%v** - Эта команда отображает формат значения по умолчанию. Изменение глагола со знаком плюс (%+v) включает имена полей при записи значений структуры.
+**%#v** Эта команда отображает значение в формате, который можно использовать для повторного создания значения в файле кода Go.
+**%T** Эта команда отображает тип значения Go.
+### Exemple
+func main() {
+	var str string = "StringA"
+	fmt.Printf("Value %v, Go syntax %#v, Type %T\n", str, str, str)
+	//Value StringA, Go syntax "StringA", Type string
+}
+### Example %+v created my own verb
+type Book struct {
+	name  string
+	pages int
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+func main() {
+	book1 := Book{name: "Shopin", pages: 555}
+
+	Printfln("Val and ...%+v", book1) //Val and ...{name:Shopin pages:555}
+}
+## fmt.Sprintf and format verb
+type Book struct {
+	Name  string
+	Price float64
+}
+
+func (p Book) String() string {
+	return fmt.Sprintf("Product: %v, Price: $%4.2f", p.Name, p.Price)
+}
+
+func main() {
+	book1 := Book{Name: "Shopin", Price: 55.5}
+
+	book1Info := book1.String()
+	fmt.Println(book1Info) //Product: Shopin, Price: $55.50
+}
+## %b , %d, %o, %x verb
+%b
+Эта команда отображает целочисленное значение в виде двоичной строки.
+%d
+Эта команда отображает целочисленное значение в виде десятичной строки. Это формат по умолчанию для целочисленных значений, применяемый при использовании глагола %v.
+%o, %O
+Эти команды отображают целочисленное значение в виде восьмеричной строки. Глагол %O добавляет префикс 0o.
+%x, %X
+Эти команды отображают целочисленное значение в виде шестнадцатеричной строки. Буквы от A до F отображаются в нижнем регистре с помощью глагола %x и в верхнем регистре с помощью глагола %X.
+### Example
+func main() {
+    number := 250
+    Printfln("Binary: %b", number)
+    Printfln("Decimal: %d", number)
+    Printfln("Octal: %o, %O", number, number)
+    Printfln("Hexadecimal: %x, %X", number, number)
+}
+## %b, %e, %E, %f, %F, %g, %G ,%x, %X verb
+%b
+Эта команда отображает значение с плавающей запятой с показателем степени и без десятичной точки.
+%e, %E
+Эти команды отображают значение с плавающей запятой с показателем степени и десятичным разрядом. %e использует индикатор степени в нижнем регистре, а %E использует индикатор в верхнем регистре.
+%f, %F
+Эти команды отображают значение с плавающей запятой с десятичным разрядом, но без экспоненты. Команды %f и %F производят одинаковый результат.
+%g
+Этот глагол адаптируется к отображаемому значению. Формат %e используется для значений с большими показателями степени, в противном случае используется формат %f. Это формат по умолчанию, применяемый при использовании глагола %v.
+%G
+Этот глагол адаптируется к отображаемому значению. Формат %E используется для значений с большими показателями степени, в противном случае используется формат %f.
+%x, %X
+Эти команды отображают значение с плавающей запятой в шестнадцатеричном представлении со строчными (%x) или прописными (%X) буквами.
+### Example
+func main() {
+    number := 279.00
+    Printfln("Decimalless with exponent: %b", number)
+    Printfln("Decimal with exponent: %e", number)
+    Printfln("Decimal without exponent: %f", number)
+    Printfln("Hexadecimal: %x, %X", number, number)
+}
+### Example Форматом значений с плавающей запятой можно управлять
+func main() {
+    number := 279.00
+    Printfln("Decimal without exponent: >>%8.2f<<", number)
+}
+## + 0 - Модификаторы
+```
++
+Этот модификатор (знак плюс) всегда печатает знак, положительный или отрицательный, для числовых значений.
+0
+Этот модификатор использует нули, а не пробелы, в качестве заполнения, когда ширина превышает количество символов, необходимое для отображения значения.
+-
+Этот модификатор (символ вычитания) добавляет отступ справа от числа, а не слева.
+```
+### Example
+func main() {
+    number := 279.00
+    Printfln("Sign: >>%+.2f<<", number)
+    Printfln("Zeros for Padding: >>%010.2f<<", number)
+    Printfln("Right Padding: >>%-8.2f<<", number)
+}
+## rune verb
+%s
+Этот глагол отображает строку. Это формат по умолчанию, применяемый при использовании глагола %v.
+%c
+Этот глагол отображает характер. Необходимо соблюдать осторожность, чтобы избежать разделения строк на отдельные байты, как это объясняется в тексте после таблицы.
+%U
+Эта команда отображает символ в формате Unicode, так что вывод начинается с U+, за которым следует шестнадцатеричный код символа.
+### Example
+func main() {
+    name := "Kayak"
+    Printfln("String: %s", name)
+    Printfln("Character: %c", []rune(name)[0])
+    Printfln("Unicode: %U", []rune(name)[0])
+}
+## bool verb
+%t
+Эта команда форматирует логические значения и отображает значение true или false.
+func main() {
+    name := "Kayak"
+    Printfln("Bool: %t", len(name) > 1)
+    Printfln("Bool: %t", len(name) > 100)
+}
+## *Pointer verb
+%p
+Эта команда отображает шестнадцатеричное представление места хранения указателя
+## fmt.Scan 
+### Theory
+**Функция Scan считывает строку из стандартного ввода и сканирует ее на наличие значений, разделенных пробелами**
+Scan(...vals)
+Эта функция считывает текст из стандарта и сохраняет значения, разделенные пробелами, в указанные аргументы. Новые строки обрабатываются как пробелы, и функция читает до тех пор, пока не получит значения для всех своих аргументов. Результатом является количество прочитанных значений и error, описывающая любые проблемы.
+Scanln(...vals)
+Эта функция работает так же, как Scan, но останавливает чтение, когда встречает символ новой строки.
+Scanf(template, ...vals)
+Эта функция работает так же, как Scan, но использует строку шаблона для выбора значений из получаемых входных данных.
+Fscan(reader, ...vals)
+Эта функция считывает значения, разделенные пробелами, из указанного средства чтения, описанного в главе 20. Новые строки обрабатываются как пробелы, и функция возвращает количество прочитанных значений и ошибку, описывающую любые проблемы.
+Fscanln(reader, ...vals)
+Эта функция работает так же, как Fscan, но останавливает чтение, когда встречает символ новой строки.
+Fscanf(reader, template, ...vals)
+Эта функция работает так же, как Fscan, но использует шаблон для выбора значений из получаемых входных данных.
+Sscan(str, ...vals)
+Эта функция просматривает указанную строку в поисках значений, разделенных пробелами, которые присваиваются остальным аргументам. Результатом является количество просканированных значений и ошибка, описывающая любые проблемы.
+Sscanf(str, template, ...vals)
+Эта функция работает так же, как Sscan, но использует шаблон для выбора значений из строки.
+Sscanln(str, template, ...vals)
+Эта функция работает так же, как Sscanf, но останавливает сканирование строки, как только встречается символ новой строки.
+### Example scan
+func main() {
+    var name string
+    var category string
+    var price float64
+    fmt.Print("Enter text to scan: ")
+    n, err := fmt.Scan(&name, &category, &price)
+    if (err == nil) {
+        Printfln("Scanned %v values", n)
+        Printfln("Name: %v, Category: %v, Price: %.2f", name, category, price)
+    } else {
+        Printfln("Error: %v", err.Error())
+    }
+}
+### Example Сканирование в срез
+var in int
+	fmt.Print("Количество елементов среза: ")
+	fmt.Scan(&in)
+
+	vals := make([]string, in)
+	ivals := make([]interface{}, in)
+	for i := 0; i < len(vals); i++ {
+		ivals[i] = &vals[i]
+	}
+	fmt.Print("Enter text to scan: ")
+	fmt.Scan(ivals...)
+	Printfln("Name: %v", vals)
+### fmt.Sscan Сканирует в переменные со строки
+func SSscan() {
+	source := "Lifejacket Watersports 48.95"
+	var name, category string
+	var price float64
+	//Сканирует в переменные со строки
+	//разделитель пробел
+	n, err := fmt.Sscan(source, &name, &category, &price)
+	if err == nil {
+		fmt.Printf("Scanned %v values\n", n)
+		fmt.Printf("Name: %v, Category: %v, Price: %.2f", name, category, price)
+	} else {
+		fmt.Printf("Error: %v", err.Error())
+	}
+}
+# 18
+
+
 
 
 

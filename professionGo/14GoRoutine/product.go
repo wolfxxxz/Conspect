@@ -40,8 +40,6 @@ func init() {
 	for _, p := range ProductList {
 		if _, ok := Products[p.Category]; ok {
 			Products[p.Category] = append(Products[p.Category], p)
-			//fmt.Print(p.Category, "  ")
-			//fmt.Println(p)
 		} else {
 			Products[p.Category] = ProductGroup{p}
 		}
