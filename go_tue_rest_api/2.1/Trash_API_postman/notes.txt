@@ -1,0 +1,47 @@
+
+//New project
+//1. create main.go
+//2. C:\Users\Mvmir\go\crc2\Semitrash_API>go mod init Semitrash_API
+     go mod init __  - создаёт файл go.mod - что бы было удобно работать с go build (не нужно писать полный путь)
+                                           - и можно было скачать gorilla
+3. создать  
+   var port = "8080"
+   func main() {
+    log.Println("Router configured successfully! Let`s go!")
+	// Безконечный цикл который мониторит запросы по адрессу ":"+port (:8080)
+	log.Fatal(http.ListenAndServe(":"+port, router))
+   }
+
+4. Создать Trash_API.exe
+C:\Users\Mvmir\go\crc2\Trash_API>go build .     -- //построить                
+C:\Users\Mvmir\go\crc2\Trash_API>go run .       -- //построить, тоже самое что go build . 
+
+
+5. Для корректной работы роутера => Установить библиотеку github.com/gorilla/mux
+ВНИМАНИЕ!!! go.mod уже должен быть, иначе придётся искать C:\Users\Mvmir\go\pkg\mod\github.com
+
+C:\Users\Mvmir\go\crc2\Semitrash_API>go get -u github.com/gorilla/mux
+
+
+_ C:\Users\Mvmir\go\crc2\Semitrash_API>go get -u github.com/joho/godotenv
+
+1.58
+
+2.33_bookHandlers
+2.48
+
+
+
+
+---------------------------------------
+-----Создать скрипт на го который проверяет и стопорит порты если лажа-----------
+
+C:\Users\Mvmir\go\crc2\Trash_API>go build .                     //построить
+
+C:\Users\Mvmir\go\crc2\Trash_API>go run .                       // запустить сервер
+2022/11/28 09:54:35 Trying to start REST API pizza!
+
+C:\Users\Mvmir\go\crc2\Trash_API>go get -u github.com/gorilla/mux // установить библиотеку(интернет) 31.10
+//go env - просмотр в терминале
+
+1.03 pause

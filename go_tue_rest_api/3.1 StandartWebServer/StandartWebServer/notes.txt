@@ -1,0 +1,87 @@
+1. Создать C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer
+
+2. go mod init 
+    . C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>
+    Доступ будет не только локально
+    ( если есть каталог cmd ТО -> /sd StandartWebServer
+    C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>go mod init github.com/Mvmir/go2/StandartWebServer
+
+usefull
+Стандарты составления пакетов и вообще
+ https://github.com/golang-standards/project-layout
+
+3. main.go
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer\cmd\api
+create main.go
+
+4. (cmd) build struct command
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>go build -v ./cmd/api/
+
+(cmd) run api.exe
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>api
+
+5. api.go
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer\internal\app\api
+create api.go
+
+6. Создать папку configs and files .env , api.toml
+
+6.1 скачать пакет томл
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>go get github.com/BurntSushi/toml
+
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>go get -u github.com/BurntSushi/toml
+где -u обновить версию пакета томл
+
+6.2 flag.Stringvar - настройки конфиг
+flag.Parse() запускает выполнение этих настроек
+6.2 при запуске передать настройки с файда томл
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>api -path configs/api.toml
+
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>api -help
+
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer\cmd\api
+//////////////////Сменить каталог cmd
+CD C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer
+//////////
+
+Установить библиотеку для отправки логов на разные серверы
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>go get -u github.com/sirupsen/logrus
+
+Библиотека роутера
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\StandartWebServer>go get -u github.com/gorilla/mux
+
+1,32 пауза
+
+Установить 
+gnuwin32.sourceforge.net/packages/make.htm
+
+### Шаг 7. Как конфиги передавать?
+Хочется запускать :
+```
+api.exe -path configs/api.toml
+```
+
+### Шаг 8. Конфигурация http сервера
+```
+go get -u github.com/gorilla/mux
+```
+
+### В дз на потом
+Добавить в ```makefile```
+* go build -v ./cmd/api/
+
+
+Хочется, чтобы была возможность запускать наше приложение как с ```.toml``` файлом, так и с ```.env```
+Добавить в код необходимые блоки, для того, чтобы можно было запускать приложение следующими командами:
+* Должна быть возможность запускать проект с конфигами в ```.toml```
+```
+api -format .env -path configs/.env
+```
+* Должна быть возможность запускать проект с конфигами в ```.env```
+```
+api -format .toml -path configs/api.toml
+```
+* Должна быть возможность запускать проект с дефолтными параметрами (дефолтным будем считать ```api.toml```, если его нет, то запускаем с значениями из структуры ```Config```)
+```
+api
+```

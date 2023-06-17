@@ -1,0 +1,33 @@
+            New project
+1. create main.go
+
+2. C:\Users\Mvmir\go\slovarik>go mod init slovarik
+     go mod init __  - создаёт файл go.mod - что бы было удобно работать с go build (не нужно писать полный путь)
+                                           - и можно было скачать gorilla без писания длинных путей
+3. C:\Users\Mvmir\go\slovarik>go build -v .
+
+4. C:\Users\Mvmir\go\slovarik> .\slovarik
+   C:\Users\Mvmir\go\slovarik>slovarik  - так тоже работает
+
+5. Библиотека нужна для работы с роутером
+   C:\Users\Mvmir\go\slovarik>go get -u github.com/gorilla/mux
+
+6. brawser 
+   --http://localhost:8081/words/5
+   --http://localhost:8081/themes
+   --http://localhost:8081/words/6000
+   --http://localhost:8081/words/fail
+7. Postman
+
+8. CMD
+//Переменное окружение в котором будем держать данные
+  C:\Users\Mvmir\go\slovarik>go get -u github.com/joho/godotenv
+
+9. Создали файл .env в котором прописали порт, 
+   func init - достаёт порт из файла .env
+
+10. Postman 
+    - Указать тип запроса GET - если это отправка
+----- Если обновление (Put) или добавление (Post)  - Указать
+    - в Headers key -> content type -> application/json
+    - Body -> raw выбрать -> Внести данные

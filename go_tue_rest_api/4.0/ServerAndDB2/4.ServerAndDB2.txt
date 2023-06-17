@@ -1,0 +1,53 @@
+Заметка library sqlx тоже может работать
+
+
+prepare 1. Создать директорию ServerAndDB2
+prepare 2. Copy file from ServerAndDB without conspect & makefile
+
+work откат миграции
+migrate -path migrations -database "postgres://localhost:5433/restapi?sslmode=disable&user=postgres&password=1" down
+--------------------------
+C:\Users\Mvmir\go\src\github.com\Mvmir\go2\ServerAndDB2>migrate -path migrations -database "postgres://localhost:5433/restapi?sslmode=disable&user=postgres&password=1" down
+Are you sure you want to apply all down migrations? [y/N]
+y
+Applying all down migrations
+20221219121731/d UsersCreationMigration (27.6648ms)
+---------------------------------
+Step (code) 1) new migration
+''migration/...up.sql (change table users & add table articles)
+''migration/...down.sql (add table articles)
+Step (cmd)  2) migrate -path migrations -database "postgres://localhost:5433/restapi?sslmode=disable&user=postgres&password=1" up
+      pgAdmin - check creating new Table from migration
+Step (cmd)  3) migrate -path migrations -database "postgres://localhost:5433/restapi?sslmode=disable&user=postgres&password=1" down
+      pgAdmin - check delete Table
+Step (code) 4) write go.mod - serverAndDB2 (copi pasta from db) 
+                     internal/api.go; config; helper; - serverAndDB2
+                     cmd/main - serverAndDB2
+Step (cmd)  5) go build -v ./cmd/api/
+Step (cmd)  6) C:\Users\Mvmir\go\src\github.com\Mvmir\go2\ServerAndDB2>api
+----------
+Create models
+Step 1 internal/app/models/
+       create user.go
+              articles.go
+
+Step 2 create repossitories
+work with models 4erez repository
+      storage/userrepository.go
+             /articlerepository.go
+
+Step 3 create public dostup
+        1. storage.go create 2 metods Repo
+        2. type Storage struct add Userrepository & ArticleRepository
+        2.1 ArticleRepository
+           - уметь добавлять статью в бд
+           - уметь удалять по id
+           - получать все статьи
+           - получать статью по id
+           - Обновлять ДОМАШКА
+
+7 Описание маршрутизатора (api/helper.go Configurerouterfield)
+
+1.30
+             
+
