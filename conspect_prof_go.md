@@ -3337,7 +3337,1092 @@ func SSscan() {
 		fmt.Printf("Error: %v", err.Error())
 	}
 }
-# 18
+# 18 Math, sort, rand.
+## Printfln
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Theory float64
+Abs(val)
+Эта функция возвращает абсолютное значение значения float64, то есть расстояние от нуля без учета направления.
+Ceil(val)
+Эта функция возвращает наименьшее целое число, равное или превышающее указанное значение float64. Результатом также является значение float64, хотя оно представляет собой целое число.
+Copysign(x, y)
+Эта функция возвращает значение float64, которое является абсолютным значением x со знаком y.
+Floor(val)
+Эта функция возвращает наибольшее целое число, которое меньше или равно указанному значению float64. Результатом также является значение float64, хотя оно представляет собой целое число.
+Max(x, y)
+Эта функция возвращает самое большое из указанных значений float64.
+Min(x, y)
+Эта функция возвращает наименьшее из указанных значений float64.
+Mod(x, y)
+Эта функция возвращает остаток x/y.
+Pow(x, y)
+Эта функция возвращает значение x, возведенное в степень y.
+Round(val)
+Эта функция округляет указанное значение до ближайшего целого числа, округляя половинные значения в большую сторону. Результатом является значение float64, хотя оно представляет собой целое число.
+RoundToEven(val)
+Эта функция округляет указанное значение до ближайшего целого числа, округляя половинные значения до ближайшего четного числа. Результатом является значение float64, хотя оно представляет собой целое число.
+### Example float64
+func main() {
+	val1 := 279.00
+	val2 := 48.95
+	Printfln("Abs: %v", math.Abs(val1))
+	Printfln("Ceil: %v", math.Ceil(val2))
+	Printfln("Copysign: %v", math.Copysign(val1, -5))
+	Printfln("Floor: %v", math.Floor(val2))
+	Printfln("Max: %v", math.Max(val1, val2))
+	Printfln("Min: %v", math.Min(val1, val2))
+	Printfln("Mod: %v", math.Mod(val1, val2))
+	Printfln("Pow: %v", math.Pow(val1, 2))
+	Printfln("Round: %v", math.Round(val2))
+	Printfln("RoundToEven: %v", math.RoundToEven(val2))
+}
+## Theory int float and uint
+MaxInt8
+MinInt8
+Эти константы представляют наибольшее и наименьшее значения, которые могут быть сохранены с использованием int8.
+MaxInt16
+MinInt16
+Эти константы представляют наибольшее и наименьшее значения, которые могут быть сохранены с использованием типа int16.
+MaxInt32
+MinInt32
+Эти константы представляют наибольшее и наименьшее значения, которые могут быть сохранены с помощью int32.
+MaxInt64
+MinInt64
+Эти константы представляют наибольшее и наименьшее значения, которые могут быть сохранены с помощью int64.
+MaxUint8
+Эта константа представляет наибольшее значение, которое может быть представлено с помощью uint8. Наименьшее значение равно нулю.
+MaxUint16
+Эта константа представляет наибольшее значение, которое может быть представлено с помощью uint16. Наименьшее значение равно нулю.
+MaxUint32
+Эта константа представляет наибольшее значение, которое может быть представлено с помощью uint32. Наименьшее значение равно нулю.
+MaxUint64
+Эта константа представляет наибольшее значение, которое может быть представлено с помощью uint64. Наименьшее значение равно
+MaxFloat32
+MaxFloat64
+Эти константы представляют самые большие значения, которые могут быть представлены с использованием значений float32 и float64.
+SmallestNonzeroFloat32
+SmallestNonzeroFloat64
+Эти константы представляют наименьшие ненулевые значения, которые могут быть представлены с использованием значений float32 и float64.
+## Theory math/rand
+**//rand.Seed(time.Now().UnixNano()) - уже не нужен**
+Seed(s)
+Эта функция устанавливает начальное значение, используя указанное значение int64.
+Float32()
+Эта функция генерирует случайное значение float32 в диапазоне от 0 до 1.
+Float64()
+Эта функция генерирует случайное значение float64 в диапазоне от 0 до 1.
+Int()
+Эта функция генерирует случайное int значение.
+Intn(max)
+Эта функция генерирует случайное int число меньше указанного значения, как описано после таблицы.
+UInt32()
+Эта функция генерирует случайное значение uint32.
+UInt64()
+Эта функция генерирует случайное значение uint64.
+Shuffle(count, func)
+Эта функция используется для рандомизации порядка элементов, как описано после таблицы.
+### Example rand.Int()
+import "math/rand"
+
+func main() {
+	for i := 0; i < 5; i++ {
+		Printfln("Value %v : %v", i, rand.Int())
+	}
+}
+
+// Value 0 : 255403926430401497
+// Value 1 : 3354664602058181095
+// Value 2 : 1488680173336863149
+// Value 3 : 6298702337299772946
+// Value 4 : 4159130017212465651
+### Example rand в диапазоне rand.Intn(10)
+func main() {
+	for i := 0; i < 5; i++ {
+		Printfln("Value %v : %v", i, rand.Intn(10))
+	}
+}
+
+// Value 0 : 5
+// Value 1 : 5
+// Value 2 : 9
+// Value 3 : 9
+// Value 4 : 5
+### Example 3 Как сдвинуть получаемые значения
+func IntRange(min, max int) int {
+	return rand.Intn(max-min) + min
+}
+
+func main() {
+	for i := 0; i < 5; i++ {
+		Printfln("Value %v : %v", i, IntRange(10, 20))
+	}
+}
+### Example 4 перемешать []string{} rand.Shuffle
+var names = []string{"Alice", "Bob", "Charlie", "Dora", "Edith"}
+
+func main() {
+	//rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(names), func(first, second int) {
+		names[first], names[second] = names[second], names[first]
+	})
+	for i, name := range names {
+		Printfln("Index %v: Name: %v", i, name)
+	}
+}
+## Sort []string []int []float
+### Theory
+Float64s(slice)
+Эта функция сортирует срез значений float64. Элементы сортируются на месте.
+Float64sAreSorted(slice)
+Эта функция возвращает значение true, если элементы в указанном срезе float64 упорядочены.
+Ints(slice)
+Эта функция сортирует срез значений int. Элементы сортируются на месте.
+IntsAreSorted(slice)
+Эта функция возвращает значение true, если элементы в указанном int срезе упорядочены.
+Strings(slice)
+Эта функция сортирует срез string значений. Элементы сортируются на месте.
+StringsAreSorted(slice)
+Эта функция возвращает значение true, если элементы в указанном срезе string упорядочены.
+### Example 1 sort без перемещения  sort.Ints(ints)
+func main() {
+	ints := []int{9, 4, 2, -1, 10}
+	Printfln("Ints: %v", ints)
+	sort.Ints(ints)
+	Printfln("Ints Sorted: %v", ints) //Ints Sorted: [-1 2 4 9 10]
+	floats := []float64{279, 48.95, 19.50}
+	Printfln("Floats: %v", floats)
+	sort.Float64s(floats)
+	Printfln("Floats Sorted: %v", floats) //Floats Sorted: [19.5 48.95 279]
+	strings := []string{"Kayak", "Lifejacket", "Stadium"}
+	Printfln("Strings: %v", strings)
+	if !sort.StringsAreSorted(strings) {
+		sort.Strings(strings)
+		Printfln("Strings Sorted: %v", strings)
+	} else {
+		Printfln("Strings Already Sorted: %v", strings) //Strings Already Sorted: [Kayak Lifejacket Stadium]
+	}
+}
+### example 2 newSlise := create, copy, sort
+func main() {
+	ints := []int{9, 4, 2, -1, 10}
+	sortedInts := make([]int, len(ints))
+	copy(sortedInts, ints)
+	sort.Ints(sortedInts)
+	Printfln("Ints: %v", ints)
+	Printfln("Ints Sorted: %v", sortedInts)
+}
+## Поиск отсортированных данных
+### Theory
+SearchInts(slice, val)
+Эта функция ищет в отсортированном срезе указанное значение int. Результатом является индекс указанного значения или, если значение не найдено, индекс, по которому значение может быть вставлено при сохранении порядка сортировки.
+SearchFloat64s(slice, val)
+Эта функция ищет в отсортированном срезе указанное значение float64. Результатом является индекс указанного значения или, если значение не найдено, индекс, по которому значение может быть вставлено при сохранении порядка сортировки.
+SearchStrings(slice, val)
+Эта функция ищет в отсортированном срезе указанное string значение. Результатом является индекс указанного значения или, если значение не найдено, индекс, по которому значение может быть вставлено при сохранении порядка сортировки.
+Search(count, testFunc)
+Эта функция вызывает тестовую функцию для указанного количества элементов. Результатом является индекс, для которого функция возвращает значение true. Если совпадений нет, результатом является индекс, в который можно вставить указанное значение для сохранения порядка сортировки.
+### Example
+func main() {
+	ints := []int{9, 4, 2, -1, 10}
+	sortedInts := make([]int, len(ints))
+	copy(sortedInts, ints)
+	sort.Ints(sortedInts)
+	Printfln("Ints: %v", ints)
+	Printfln("Ints Sorted: %v", sortedInts) //Ints Sorted: [-1 2 4 9 10]
+	indexOf4 := sort.SearchInts(sortedInts, 4)
+	indexOf3 := sort.SearchInts(sortedInts, 3)
+	Printfln("Index of 4: %v", indexOf4) //Index of 4: 2
+	//Цыфры 3 в срезе нет но её можно поставить на второе место
+	Printfln("Index of 3: %v", indexOf3) //Index of 3: 2
+	//дополнительная проверка на наличие в срезе
+	Printfln("Index of 4: %v (present: %v)", indexOf4, sortedInts[indexOf4] == 4) //(present: true)
+	Printfln("Index of 3: %v (present: %v)", indexOf3, sortedInts[indexOf3] == 3) //(present: false)
+}
+## Сортировка типов данных
+### Theory
+Len()
+Этот метод возвращает количество элементов, которые будут отсортированы.
+Less(i, j)
+Этот метод возвращает значение true, если элемент с индексом i должен появиться в отсортированной последовательности перед элементом j. Если Less(i,j) и Less(j, i) оба false, то элементы считаются равными.
+Swap(i, j)
+Этот метод меняет местами элементы по указанным индексам.
+**--------**
+Sort(data)
+Эта функция использует методы, описанные в таблице 18-8, для сортировки указанных данных.
+Stable(data)
+Эта функция использует методы, описанные в таблице 18-8, для сортировки указанных данных без изменения порядка элементов с одинаковым значением.
+IsSorted(data)
+Эта функция возвращает значение true, если данные отсортированы.
+Reverse(data)
+Эта функция меняет порядок данных.
+### Example 1
+//productsort.go
+import "sort"
+
+type Product struct {
+	Name  string
+	Price float64
+}
+type ProductSlice []Product
+
+func ProductSlices(p []Product) {
+	sort.Sort(ProductSlice(p))
+}
+func ProductSlicesAreSorted(p []Product) {
+	sort.IsSorted(ProductSlice(p))
+}
+func (products ProductSlice) Len() int {
+	return len(products)
+}
+func (products ProductSlice) Less(i, j int) bool {
+	return products[i].Price < products[j].Price
+}
+func (products ProductSlice) Swap(i, j int) {
+	products[i], products[j] = products[j], products[i]
+}
+// main.go
+func main() {
+	products := []Product{
+		{"Kayak", 279},
+		{"Lifejacket", 49.95},
+		{"Soccer Ball", 19.50},
+	}
+	ProductSlices(products)
+	for _, p := range products {
+		Printfln("Name: %v, Price: %.2f", p.Name, p.Price)
+	}
+}
+### Example 2 sortName struct
+type Product struct {
+	Name  string
+	Price float64
+}
+type ProductSlice []Product
+
+func ProductSlices(p []Product) {
+	sort.Sort(ProductSlice(p))
+}
+func ProductSlicesAreSorted(p []Product) {
+	sort.IsSorted(ProductSlice(p))
+}
+func (products ProductSlice) Len() int {
+	return len(products)
+}
+func (products ProductSlice) Less(i, j int) bool {
+	return products[i].Price < products[j].Price
+}
+func (products ProductSlice) Swap(i, j int) {
+	products[i], products[j] = products[j], products[i]
+}
+
+type ProductSliceName struct{ ProductSlice }
+
+func ProductSlicesByName(p []Product) {
+	sort.Sort(ProductSliceName{p})
+}
+func (p ProductSliceName) Less(i, j int) bool {
+	return p.ProductSlice[i].Name < p.ProductSlice[j].Name
+}
+
+func main() {
+	products := []Product{
+		{"Kayak", 279},
+		{"Lifejacket", 49.95},
+		{"Soccer Ball", 19.50},
+	}
+	//ProductSlices(products)
+	ProductSlicesByName(products)
+	for _, p := range products {
+		Printfln("Name: %v, Price: %.2f", p.Name, p.Price)
+	}
+}
+### Сравнение
+//productsort.go
+import "sort"
+
+type Product struct {
+	Name  string
+	Price float64
+}
+type ProductSlice []Product
+
+func ProductSlices(p []Product) {
+	sort.Sort(ProductSlice(p))
+}
+
+func ProductSlicesAreSorted(p []Product) {
+	sort.IsSorted(ProductSlice(p))
+}
+
+func (products ProductSlice) Len() int {
+	return len(products)
+}
+
+func (products ProductSlice) Less(i, j int) bool {
+	return products[i].Price < products[j].Price
+}
+
+func (products ProductSlice) Swap(i, j int) {
+	products[i], products[j] = products[j], products[i]
+}
+
+type ProductSliceName struct{ ProductSlice }
+
+func ProductSlicesByName(p []Product) {
+	sort.Sort(ProductSliceName{p})
+}
+
+func (p ProductSliceName) Less(i, j int) bool {
+	return p.ProductSlice[i].Name < p.ProductSlice[j].Name
+}
+
+type ProductComparison func(p1, p2 Product) bool
+
+type ProductSliceFlex struct {
+	ProductSlice
+	ProductComparison
+}
+
+func (flex ProductSliceFlex) Less(i, j int) bool {
+	return flex.ProductComparison(flex.ProductSlice[i], flex.ProductSlice[j])
+}
+func SortWith(prods []Product, f ProductComparison) {
+	sort.Sort(ProductSliceFlex{prods, f})
+}
+**----**
+func main() {
+	products := []Product{
+		{"Kayak", 279},
+		{"Lifejacket", 49.95},
+		{"Soccer Ball", 19.50},
+	}
+	//ProductSlices(products)
+	//ProductSlicesByName(products)
+	SortWith(products, func(p1, p2 Product) bool {
+		return p1.Name < p2.Name
+	})
+	for _, p := range products {
+		Printfln("Name: %v, Price: %.2f", p.Name, p.Price)
+	}
+}
+# 19 Даты, время и продолжительность time
+## Theory and practice
+### func Time
+Now()
+Эта функция создает Time, представляющий текущий момент времени.
+Date(y, m, d, h, min, sec, nsec, loc)
+Эта функция создает объект Time, представляющий указанный момент времени, который выражается аргументами года, месяца, дня, часа, минуты, секунды, наносекунды и Location. (Тип Location описан в разделе «Синтаксический анализ значений времени из строк».)
+Unix(sec, nsec)
+Эта функция создает значение Time из числа секунд и наносекунд с 1 января 1970 года по Гринвичу, широко известного как время Unix.
+### metods time
+Date()
+Этот метод возвращает компоненты года, месяца и дня. Год и день выражаются как значения int, а месяц — как значение Month.
+Clock()
+Этот метод возвращает компоненты часа, минут и секунд Time.
+Year()
+Этот метод возвращает компонент года, выраженный как int.
+YearDay()
+Этот метод возвращает день года, выраженный как int от 1 до 366 (для учета високосных лет).
+Month()
+Этот метод возвращает компонент месяца, выраженный с использованием типа Month.
+Day()
+Этот метод возвращает день месяца, выраженный как int.
+Weekday()
+Этот метод возвращает день недели, выраженный как Weekday.
+Hour()
+Этот метод возвращает час дня, выраженный как int от 0 до 23.
+Minute()
+Этот метод возвращает количество минут, прошедших до часа дня, выраженное как int от 0 до 59.
+Second()
+Этот метод возвращает количество секунд, прошедших до минуты часа, выраженное как int от 0 до 59.
+Nanosecond()
+Этот метод возвращает количество наносекунд, прошедших до секунды минуты, выраженное как int от 0 до 999 999 999.
+### type Time
+Month
+Этот тип представляет месяц, а пакет time определяет постоянные значения для названий месяцев на английском языке: January, February и т. д. Тип Month определяет метод String, который использует эти имена при форматировании строк.
+Weekday
+Этот тип представляет день недели, а пакет time определяет постоянные значения для названий дней недели на английском языке: Sunday, Monday и т. д. Тип Weekday определяет метод String, который использует эти имена при форматировании строк.
+### Example 1 PrintTime time.Now and
+func PrintTime(label string, t *time.Time) {
+	Printfln("%s: Day: %v: Month: %v Year: %v",
+		label, t.Day(), t.Month(), t.Year())
+}
+func main() {
+	current := time.Now()
+	specific := time.Date(1995, time.June, 9, 0, 0, 0, 0, time.Local)
+	unix := time.Unix(1433228090, 0)
+	PrintTime("Current", &current)
+	//or
+	fmt.Println(current.Day(), current.Month(), current.Year())
+	PrintTime("Specific", &specific)
+	PrintTime("UNIX", &unix)
+}
+### Exemple Format(layout)
+//Format(layout) - Этот метод возвращает отформатированную строку, созданную с использованием указанного макета.
+
+func PrintTime(label string, t *time.Time) {
+	layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(layout))
+}
+func main() {
+	current := time.Now()
+	specific := time.Date(1995, time.June, 9, 0, 0, 0, 0, time.Local)
+	unix := time.Unix(1433228090, 0)
+	PrintTime("Current", &current)
+	PrintTime("Specific", &specific)
+	PrintTime("UNIX", &unix)
+	fmt.Println(current.Day(), current.Month(), current.Year())
+}
+### Константы компоновки
+#### Theory
+ANSIC
+Mon Jan _2 15:04:05 2006
+UnixDate
+Mon Jan _2 15:04:05 MST 2006
+RubyDate
+Mon Jan 02 15:04:05 -0700 2006
+RFC822
+02 Jan 06 15:04 MST
+RFC822Z
+02 Jan 06 15:04 -0700
+RFC850
+Monday, 02-Jan-06 15:04:05 MST
+RFC1123
+Mon, 02 Jan 2006 15:04:05 MST
+RFC1123Z
+Mon, 02 Jan 2006 15:04:05 -0700
+RFC3339
+2006-01-02T15:04:05Z07:00
+RFC3339Nano
+2006-01-02T15:04:05.999999999Z07:00
+Kitchen
+3:04PM
+Stamp
+Jan _2 15:04:05
+StampMilli
+Jan _2 15:04:05.000
+StampMicro
+Jan _2 15:04:05.000000
+StampNano
+Jan _2 15:04:05.000000000
+#### Exemple
+func PrintTime(label string, t *time.Time) {
+	//layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(time.RFC822Z))
+}
+func main() {
+	current := time.Now()
+	specific := time.Date(1995, time.June, 9, 0, 0, 0, 0, time.Local)
+	unix := time.Unix(1433228090, 0)
+	PrintTime("Current", &current)
+	PrintTime("Specific", &specific)
+	PrintTime("UNIX", &unix)
+	fmt.Println(current.Day(), current.Month(), current.Year())
+}
+### Разбор значений времени из строк
+#### Theory
+Parse(layout, str)
+Эта функция анализирует строку, используя указанный макет, чтобы создать значение Time. Возвращается error, указывающая на проблемы с разбором строки.
+ParseInLocation(layout, str, location)
+Эта функция анализирует строку, используя указанный макет и Location, если в строку не включен часовой пояс. Возвращается error, указывающая на проблемы с разбором строки.
+#### Exemple
+func PrintTime(label string, t *time.Time) {
+	//layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(time.RFC822Z))
+}
+func main() {
+	layout := "2006-Jan-02"
+	dates := []string{
+		"1995-Jun-09",
+		"2015-Jun-02",
+	}
+	for _, d := range dates {
+		time, err := time.Parse(layout, d)
+		if err == nil {
+			PrintTime("Parsed", &time)
+		} else {
+			Printfln("Error: %s", err.Error())
+		}
+	}
+}
+### предопределенных макетов даты
+func PrintTime(label string, t *time.Time) {
+	//layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(time.RFC822Z))
+}
+func main() {
+	dates := []string{
+		"09 Jun 95 00:00 GMT",
+		"02 Jun 15 00:00 GMT",
+	}
+	for _, d := range dates {
+		time, err := time.Parse(time.RFC822, d)
+		if err == nil {
+			PrintTime("Parsed", &time)
+		} else {
+			Printfln("Error: %s", err.Error())
+		}
+	}
+}
+### Указание разбора местоположения
+#### Theory
+LoadLocation(name)
+Эта функция возвращает *Location для указанного имени и error, указывающую на наличие проблем.
+LoadLocationFromTZData(name, data)
+Эта функция возвращает *Location из байтового среза, содержащего отформатированную базу данных часовых поясов.
+FixedZone(name, offset)
+Эта функция возвращает *Location, который всегда использует указанное имя и смещение от UTC.
+#### Exemple
+func PrintTime(label string, t *time.Time) {
+	//layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(time.RFC822Z))
+}
+func main() {
+	layout := "02 Jan 06 15:04"
+	date := "09 Jun 95 19:30"
+	london, lonerr := time.LoadLocation("Europe/London")
+	newyork, nycerr := time.LoadLocation("America/New_York")
+	if lonerr == nil && nycerr == nil {
+		nolocation, _ := time.Parse(layout, date)
+		londonTime, _ := time.ParseInLocation(layout, date, london)
+		newyorkTime, _ := time.ParseInLocation(layout, date, newyork)
+		PrintTime("No location:", &nolocation)
+		PrintTime("London:", &londonTime)
+		PrintTime("New York:", &newyorkTime)
+	} else {
+		fmt.Println(lonerr.Error(), nycerr.Error())
+	}
+}
+### Встраивание базы данных часовых поясов
+База данных часовых поясов, используемая для создания значений Location, устанавливается вместе с инструментами Go, что означает, что она может быть недоступна при развертывании скомпилированного приложения. Пакет time/tzdata содержит встроенную версию базы данных, загружаемую функцией инициализации пакета (как описано в главе 12). Чтобы гарантировать, что данные часового пояса всегда будут доступны, объявите зависимость от пакета следующим образом:
+...
+import (
+    "fmt"
+    "time"
+       _ "time/tzdata"
+)
+...
+В пакете нет экспортированных функций, поэтому пустой идентификатор должен использоваться для объявления зависимости без создания ошибки компилятора.
+### Использование локального местоположения
+func PrintTime(label string, t *time.Time) {
+	//layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(time.RFC822Z))
+}
+func main() {
+	layout := "02 Jan 06 15:04"
+	date := "09 Jun 95 19:30"
+	london, lonerr := time.LoadLocation("Europe/London")
+	newyork, nycerr := time.LoadLocation("America/New_York")
+	local, _ := time.LoadLocation("Local")
+	if lonerr == nil && nycerr == nil {
+		nolocation, _ := time.Parse(layout, date)
+		londonTime, _ := time.ParseInLocation(layout, date, london)
+		newyorkTime, _ := time.ParseInLocation(layout, date, newyork)
+		localTime, _ := time.ParseInLocation(layout, date, local)
+		PrintTime("No location:", &nolocation)
+		PrintTime("London:", &londonTime)
+		PrintTime("New York:", &newyorkTime)
+		PrintTime("Local:", &localTime)
+	} else {
+		fmt.Println(lonerr.Error(), nycerr.Error())
+	}
+}
+### Непосредственное указание часовых поясов
+func PrintTime(label string, t *time.Time) {
+	//layout := "Day: 02 Month: Jan Year: 2006"
+	fmt.Println(label, t.Format(time.RFC822Z))
+}
+func main() {
+	layout := "02 Jan 06 15:04"
+	date := "09 Jun 95 19:30"
+	london := time.FixedZone("BST", 1*60*60)
+	newyork := time.FixedZone("EDT", -4*60*60)
+	local := time.FixedZone("Local", 0)
+	//if lonerr == nil && nycerr == nil {
+	nolocation, _ := time.Parse(layout, date)
+	londonTime, _ := time.ParseInLocation(layout, date, london)
+	newyorkTime, _ := time.ParseInLocation(layout, date, newyork)
+	localTime, _ := time.ParseInLocation(layout, date, local)
+	PrintTime("No location:", &nolocation)
+	PrintTime("London:", &londonTime)
+	PrintTime("New York:", &newyorkTime)
+	PrintTime("Local:", &localTime)
+	// } else {
+	// 	fmt.Println(lonerr.Error(), nycerr.Error())
+	// }
+}
+## Управление значениями времени time.Duration
+### Theory 
+Add(duration)
+Этот метод добавляет указанную Duration к Time и возвращает результат.
+Sub(time)
+Этот метод возвращает значение Duration, выражающее разницу между Time вызова метода и Time, указанным в качестве аргумента.
+AddDate(y, m, d)
+Этот метод добавляет к Time указанное количество лет, месяцев и дней и возвращает результат.
+After(time)
+Этот метод возвращает значение true, если Time, в которое был вызван метод, наступает после Time, указанного в качестве аргумента.
+Before(time)
+Этот метод возвращает значение true, если время, в которое был вызван метод, предшествует Time, указанному в качестве аргумента.
+Equal(time)
+Этот метод возвращает значение true, если Time, в которое был вызван метод, равно Time, указанному в качестве аргумента.
+IsZero()
+Этот метод возвращает значение true, если Time, в которое был вызван метод, представляет момент нулевого времени, то есть 1 января 1 года, 00:00:00 UTC.
+In(loc)
+Этот метод возвращает значение Time, выраженное в указанном Location.
+Location()
+Этот метод возвращает Location, связанный с Time, что фактически позволяет выразить время в другом часовом поясе.
+Round(duration)
+Этот метод округляет Time до ближайшего интервала, представленного значением Duration.
+Truncate(duration)
+Этот метод округляет Time до ближайшего интервала, представленного значением Duration.
+### Practice
+#### Exemple 1 
+func main() {
+	t, err := time.Parse(time.RFC822, "09 Jun 95 04:59 BST")
+	if err == nil {
+		Printfln("After: %v", t.After(time.Now()))
+		Printfln("Round: %v", t.Round(time.Hour))
+		Printfln("Truncate: %v", t.Truncate(time.Hour))
+	} else {
+		fmt.Println(err.Error())
+	}
+}
+#### Exemple 2 Equal
+func main() {
+	t1, _ := time.Parse(time.RFC822Z, "09 Jun 95 04:59 +0100")
+	t2, _ := time.Parse(time.RFC822Z, "08 Jun 95 23:59 -0400")
+	Printfln("Equal Method: %v", t1.Equal(t2))
+	Printfln("Equality Operator: %v", t1 == t2)
+}
+## Представление продолжительности time.Duration part2
+### Theory
+**func**
+Hour
+Эта константа представляет 1 час.
+Minute
+Эта константа представляет 1 минуту.
+Second
+Эта константа представляет 1 секунду.
+Millisecond
+Эта константа представляет 1 миллисекунду.
+Microsecond
+Эта константа представляет 1 миллисекунду.
+Nanosecond
+Эта константа представляет 1 наносекунду.
+**Методы продолжительности**
+Hours()
+Этот метод возвращает float64, который представляет Duration в часах.
+Minutes()
+Этот метод возвращает float64, который представляет Duration в минутах.
+Seconds()
+Этот метод возвращает float64, который представляет Duration в секундах.
+Milliseconds()
+Этот метод возвращает float64, который представляет Duration в миллисекундах.
+Microseconds()
+Этот метод возвращает float64, который представляет Duration в микросекундах.
+Nanoseconds()
+Этот метод возвращает float64, который представляет Duration в наносекундах.
+Round(duration)
+Этот метод возвращает Duration, которая округляется до ближайшего кратного указанной Duration.
+Truncate(duration)
+Этот метод возвращает Duration, которая округляется в меньшую сторону до ближайшего кратного указанной Duration.
+### Example 1
+func main() {
+	var d time.Duration = time.Hour + (30 * time.Minute)
+	Printfln("Hours: %v", d.Hours())
+	Printfln("Mins: %v", d.Minutes())
+	Printfln("Seconds: %v", d.Seconds())
+	Printfln("Millseconds: %v", d.Milliseconds())
+	rounded := d.Round(time.Hour)
+	Printfln("Rounded Hours: %v", rounded.Hours())
+	Printfln("Rounded Mins: %v", rounded.Minutes())
+	trunc := d.Truncate(time.Hour)
+	Printfln("Truncated Hours: %v", trunc.Hours())
+	Printfln("Rounded Mins: %v", trunc.Minutes())
+}
+## Создание продолжительности относительно времени
+### Theory
+Since(time)
+Эта функция возвращает Duration, выражающую время, прошедшее с момента указанного значения Time.
+Until(time)
+Эта функция возвращает Duration, выражающую время, прошедшее до указанного значения Time.
+### Example 
+func main() {
+	toYears := func(d time.Duration) int {
+		return int(d.Hours() / (24 * 365))
+	}
+	future := time.Date(2051, 0, 0, 0, 0, 0, 0, time.Local)
+	past := time.Date(1965, 0, 0, 0, 0, 0, 0, time.Local)
+	Printfln("Future: %v", toYears(time.Until(future)))
+	Printfln("Past: %v", toYears(time.Since(past)))
+}
+## Создание длительности из строк ParseDuration(str)
+### Theory
+ParseDuration(str)
+Эта функция возвращает значение Duration и error, указывающую на наличие проблем при синтаксическом анализе указанной строки.
+h
+Эта единица обозначает часы.
+m
+Эта единица обозначает минуты.
+s
+Эта единица обозначает секунды.
+ms
+Эта единица обозначает миллисекунды.
+us или μs
+Эта единица обозначает микросекунды.
+ns
+Эта единица обозначает наносекунды.
+### Example
+func main() {
+	d, err := time.ParseDuration("1h30m")
+	if err == nil {
+		Printfln("Hours: %v", d.Hours())
+		Printfln("Mins: %v", d.Minutes())
+		Printfln("Seconds: %v", d.Seconds())
+		Printfln("Millseconds: %v", d.Milliseconds())
+	} else {
+		fmt.Println(err.Error())
+	}
+}
+## Использование функций времени для горутин и каналов
+### Theory
+Sleep(duration)
+Эта функция приостанавливает текущую горутину по крайней мере на указанное время.
+AfterFunc(duration, func)
+Эта функция выполняет указанную функцию в своей собственной горутине по истечении указанного времени. Результатом является *Timer, метод Stop которого можно использовать для отмены выполнения функции до истечения продолжительности.
+After(duration)
+Эта функция возвращает канал, который блокируется на указанное время, а затем возвращает значение Time. Подробнее см. в разделе «Получение уведомлений по времени».
+Tick(duration)
+Эта функция возвращает канал, который периодически отправляет значение Time, где период указан как продолжительность.
+### Example 
+func writeToChannel(channel chan<- string) {
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	for _, name := range names {
+		channel <- name
+		time.Sleep(time.Second * 1)
+	}
+	close(channel)
+}
+func main() {
+	nameChannel := make(chan string)
+	go writeToChannel(nameChannel)
+	for name := range nameChannel {
+		Printfln("Read name: %v", name)
+	}
+}
+### Example 2 Отсрочка выполнения функции time.AfterFunc
+func writeToChannel(channel chan<- string) {
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	for _, name := range names {
+		channel <- name
+		//time.Sleep(time.Second * 1)
+	}
+	close(channel)
+}
+func main() {
+	nameChannel := make(chan string)
+	time.AfterFunc(time.Second*5, func() { writeToChannel(nameChannel) })
+	for name := range nameChannel {
+		Printfln("Read name: %v", name)
+	}
+}
+## Получение уведомлений по времени
+func writeToChannel(channel chan<- string) {
+	Printfln("Waiting for initial duration...")
+	_ = <-time.After(time.Second * 2)
+	Printfln("Initial duration elapsed.")
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	for _, name := range names {
+		channel <- name
+		time.Sleep(time.Second * 1)
+	}
+	close(channel)
+}
+func main() {
+	nameChannel := make(chan string)
+	go writeToChannel(nameChannel)
+	for name := range nameChannel {
+		Printfln("Read name: %v", name)
+	}
+}
+## Использование уведомлений в качестве тайм-аутов в операторах Select
+func writeToChannel(channel chan<- string) {
+	Printfln("Waiting for initial duration...")
+	_ = <-time.After(time.Second * 2)
+	Printfln("Initial duration elapsed.")
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	for _, name := range names {
+		channel <- name
+		time.Sleep(time.Second * 3)
+	}
+	close(channel)
+}
+func main() {
+	nameChannel := make(chan string)
+	go writeToChannel(nameChannel)
+	channelOpen := true
+	for channelOpen {
+		Printfln("Starting channel read")
+		select {
+		case name, ok := <-nameChannel:
+			if !ok {
+				channelOpen = false
+				break
+			} else {
+				Printfln("Read name: %v", name)
+			}
+		case <-time.After(time.Second * 2):
+			Printfln("Timeout")
+		}
+	}
+}
+## Остановка и сброс таймеров NewTimer(duration)
+### Theory
+NewTimer(duration) - Эта функция возвращает *Timer с указанным периодом.
+C - Это поле возвращает канал, по которому Time будет отправлять свое значение Time.
+Stop() - Этот метод останавливает таймер. Результатом является логическое значение, которое будет true, если таймер был остановлен, и false, если таймер уже отправил свое сообщение.
+Reset(duration) - Этот метод останавливает таймер и сбрасывает его так, чтобы его интервал был заданным значением Duration.
+### Example
+func writeToChannel(channel chan<- string) {
+	Printfln("Waiting for initial duration...")
+	timer := time.NewTimer(time.Minute * 10)
+	go func() {
+		time.Sleep(time.Second * 2)
+		Printfln("Resetting timer")
+		timer.Reset(time.Second)
+	}()
+
+	Printfln("Initial duration elapsed.")
+	<-timer.C
+	Printfln("Initial duration elapsed.")
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	for _, name := range names {
+		channel <- name
+		//time.Sleep(time.Second * 3)
+	}
+	close(channel)
+}
+func main() {
+	nameChannel := make(chan string)
+	go writeToChannel(nameChannel)
+	for name := range nameChannel {
+		Printfln("Read name: %v", name)
+	}
+}
+## Получение повторяющихся уведомлений time.Tick
+### Theory
+NewTicker(duration)
+Эта функция возвращает *Ticker с указанным периодом.
+C
+Это поле возвращает канал, по которому Ticker будет отправлять значения Time.
+Stop()
+Этот метод останавливает тикер (но не закрывает канал, возвращаемый полем C).
+Reset(duration)
+Этот метод останавливает тикер и сбрасывает его так, чтобы его интервал был равен указанной Duration.
+### Example 1
+func writeToChannel(nameChannel chan<- string) {
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	tickChannel := time.Tick(time.Second)
+	index := 0
+	for {
+		<-tickChannel
+		nameChannel <- names[index]
+		index++
+		if index == len(names) {
+			index = 0
+		}
+	}
+}
+func main() {
+	nameChannel := make(chan string)
+	go writeToChannel(nameChannel)
+	for name := range nameChannel {
+		Printfln("Read name: %v", name)
+	}
+}
+### Example 2
+func writeToChannel(nameChannel chan<- string) {
+	names := []string{"Alice", "Bob", "Charlie", "Dora"}
+	ticker := time.NewTicker(time.Second / 10)
+	index := 0
+	for {
+		<-ticker.C
+		nameChannel <- names[index]
+		index++
+		if index == len(names) {
+			ticker.Stop()
+			close(nameChannel)
+			break
+		}
+	}
+}
+func main() {
+	nameChannel := make(chan string)
+	go writeToChannel(nameChannel)
+	for name := range nameChannel {
+		Printfln("Read name: %v", name)
+	}
+}
+# 20 Чтение и запись данных
+## Theory Read
+Read(byteSlice)
+Этот метод считывает данные в указанный []byte. Метод возвращает количество прочитанных байтов, выраженное как int, и error.
+### Example
+func processData(reader io.Reader) {
+	b := make([]byte, 2)
+	for {
+		count, err := reader.Read(b)
+		if count > 0 {
+			Printfln("Read %v bytes: %v", count, string(b[0:count]))
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+}
+
+func main() {
+	r := strings.NewReader("Kayak Яматоусуки")
+	processData(r)
+}
+## Theory Writer
+Write(byteSlice)
+Этот метод записывает данные из указанного byte среза. Метод возвращает количество записанных байтов и error. Ошибка будет ненулевой, если количество записанных байтов меньше длины среза.
+### Example
+func processDataRead(reader io.Reader, writer io.Writer) {
+	b := make([]byte, 2)
+	for {
+		count, err := reader.Read(b)
+		if count > 0 {
+			writer.Write(b[0:count])
+			Printfln("Read %v bytes: %v", count, string(b[0:count]))
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+}
+
+func main() {
+	r := strings.NewReader("Kayak Яматоусуки")
+	//processData(r)
+	//
+	var builder strings.Builder
+	processDataRead(r, &builder)
+	Printfln("String builder contents: %s", builder.String())
+}
+## Theory Read and Write (Copy, ReadAll, WriteString)
+Copy(w, r)
+Эта функция копирует данные из Reader в Writer до тех пор, пока не будет возвращен EOF или не будет обнаружена другая ошибка. Результатом является количество копий байтов и error, используемая для описания любых проблем.
+CopyBuffer(w, r, buffer)
+Эта функция выполняет ту же задачу, что и Copy, но считывает данные в указанный буфер перед их передачей во Writer.
+CopyN(w, r, count)
+Эта функция копирует count байтов из Reader в Writer. Результатом является количество копий байтов и error, используемая для описания любых проблем.
+ReadAll(r)
+Эта функция считывает данные из указанного Reader до тех пор, пока не будет достигнут EOF. Результатом является байтовый срез, содержащий считанные данные и error, которая используется для описания любых проблем.
+ReadAtLeast(r, byteSlice, min)
+Эта функция считывает как минимум указанное количество байтов из устройства чтения, помещая их в байтовый срез. Сообщается об ошибке, если считано меньше байтов, чем указано.
+ReadFull(r, byteSlice)
+Эта функция заполняет указанный байтовый срез данными. Результатом является количество прочитанных байтов и error. Будет сообщено об ошибке, если EOF будет обнаружен до того, как будет прочитано достаточно байтов для заполнения среза.
+WriteString(w, str)
+Эта функция записывает указанную строку в модуль записи.
+### Example copy
+func processData(reader io.Reader, writer io.Writer) {
+	count, err := io.Copy(writer, reader)
+	if err == nil {
+		Printfln("Read %v bytes", count)
+	} else {
+		Printfln("Error: %v", err.Error())
+	}
+}
+func main() {
+	r := strings.NewReader("Kayak")
+	var builder strings.Builder
+	processData(r, &builder)
+	Printfln("String builder contents: %s", builder.String())
+}
+## специализированных средств чтения и записи
+Pipe()
+Эта функция возвращает PipeReader и PipeWriter, которые можно использовать для соединения функций, требующих Reader и Writer, как описано в разделе «Использование каналов».
+MultiReader(...readers)
+Эта функция определяет переменный параметр, который позволяет указать произвольное количество значений Reader. В результате получается Reader, которое передает содержимое каждого из своих параметров в той последовательности, в которой они определены, как описано в разделе «Объединение нескольких средств чтения».
+MultiWriter(...writers)
+Эта функция определяет переменный параметр, который позволяет указать произвольное количество значений Writer. Результатом является Writer, который отправляет одни и те же данные всем указанным модулям записи, как описано в разделе «Объединение нескольких средств записи».
+LimitReader(r, limit)
+Эта функция создает Reader, который будет завершать работу после указанного количества байтов, как описано в разделе «Ограничение чтения данных».
+### Example Pipe
+func GenerateData(writer io.Writer) {
+	data := []byte("Kayak, Lifejacket")
+	writeSize := 4
+	for i := 0; i < len(data); i += writeSize {
+		end := i + writeSize
+		if end > len(data) {
+			end = len(data)
+		}
+		count, err := writer.Write(data[i:end])
+		Printfln("Wrote %v byte(s): %v", count, string(data[i:end]))
+		if err != nil {
+			Printfln("Error: %v", err.Error())
+		}
+	}
+}
+func ConsumeData(reader io.Reader) {
+	data := make([]byte, 0, 10)
+	slice := make([]byte, 2)
+	for {
+		count, err := reader.Read(slice)
+		if count > 0 {
+			Printfln("Read data: %v", string(slice[0:count]))
+			data = append(data, slice[0:count]...)
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+	Printfln("Read data: %v", string(data))
+}
+
+func FinalReader() {
+	pipeReader, pipeWriter := io.Pipe()
+	go func() {
+		GenerateData(pipeWriter)
+		pipeWriter.Close()
+	}()
+	ConsumeData(pipeReader)
+}
+### Example MultyReader
+func main() { 
+
+	r1 := strings.NewReader("Kayak")
+	r2 := strings.NewReader("Lifejacket")
+	r3 := strings.NewReader("Canoe")
+	concatReader := io.MultiReader(r1, r2, r3)
+	ConsumeData(concatReader)
+
+}
+### Объединение нескольких средств записи MultiWriter
+func main() {
+
+	var w1 strings.Builder
+	var w2 strings.Builder
+	var w3 strings.Builder
+	combinedWriter := io.MultiWriter(&w1, &w2, &w3)
+	GenerateData(combinedWriter)
+	Printfln("Writer #1: %v", w1.String())
+	Printfln("Writer #2: %v", w2.String())
+	Printfln("Writer #3: %v", w3.String())
+
+}
+### 
+
+
+
+
+
+
+
 
 
 
