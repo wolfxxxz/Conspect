@@ -904,12 +904,9 @@ func (a *API) configreRouterField() {
 
 }
 ```
-
 Создадим файл ```internal/app/api/handlers.go```
 ```
 ```
-
-
 
 ## Лекция 8. Реализация обработчиков
 

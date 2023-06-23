@@ -1,0 +1,9 @@
+Hello My name is os.Open 
+ I can open file and some else
+Hello My name is os.Open 
+I can open file and some else 
+I use method.WriteString
+HelloMotoHello My name is os.Open 
+I can open file and some else 
+I use method.WriteString
+HelloMoto

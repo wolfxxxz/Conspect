@@ -1764,7 +1764,7 @@ func main() {
 	}
 }
 ## Value == nil
-# 11 Methods
+# 11.1 Methods
 ## metod
 type Product struct {
 	name, category string
@@ -3295,7 +3295,7 @@ Sscanf(str, template, ...vals)
 Эта функция работает так же, как Sscan, но использует шаблон для выбора значений из строки.
 Sscanln(str, template, ...vals)
 Эта функция работает так же, как Sscanf, но останавливает сканирование строки, как только встречается символ новой строки.
-### Example scan
+### Example fmt.Scan
 func main() {
     var name string
     var category string
@@ -3336,6 +3336,69 @@ func SSscan() {
 	} else {
 		fmt.Printf("Error: %v", err.Error())
 	}
+}
+## bufio
+### bufio.NewScanner
+func ScanStringOneNewReader() (string, error) {
+	fmt.Print("       ...")
+	in := bufio.NewScanner(os.Stdin)
+	if in.Scan() {
+		return in.Text(), nil
+	}
+	if err := in.Err(); err != nil {
+		return "", err
+	}
+	return "", nil
+}
+
+func main() {
+	str, err := ScanStringOneNewReader()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+}
+### bufio.NewReader
+func ScanReaderReadString() (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Введите строку: ")
+	//Читает до ограничителя
+	input, err := reader.ReadString('7') //if '\n' до ввода
+	if err != nil {
+		return "", err
+	}
+	return input, nil
+
+}
+func main() {
+	str, err := ScanReaderReadString() //ыаывавы 7 авпва
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str) //ыаывавы 7
+}
+### Split(bufio.ScanLines)
+func ScanSplit() (string, error) {
+	in := bufio.NewScanner(os.Stdin)
+	in.Split(bufio.ScanLines)
+	//in.Split(bufio.ScanWords)
+
+	fmt.Print("Введите строку: ")
+	if in.Scan() {
+		return in.Text(), nil
+	}
+	if err := in.Err(); err != nil {
+		return "", err
+	}
+	return "", nil
+}
+func main() {
+	str, err := ScanSplit()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
 }
 # 18 Math, sort, rand.
 ## Printfln
@@ -4344,6 +4407,7 @@ func main() {
 	Printfln("String builder contents: %s", builder.String())
 }
 ## специализированных средств чтения и записи
+### Theory
 Pipe()
 Эта функция возвращает PipeReader и PipeWriter, которые можно использовать для соединения функций, требующих Reader и Writer, как описано в разделе «Использование каналов».
 MultiReader(...readers)
@@ -4415,7 +4479,1042 @@ func main() {
 	Printfln("Writer #3: %v", w3.String())
 
 }
+# 21 Json
+## Типы данных в Json
+### Theory
+NewEncoder(writer)
+Эта функция возвращает Encoder, который можно использовать для кодирования данных JSON и записи их в указанный Writer.
+NewDecoder(reader)
+Эта функция возвращает Decoder, который можно использовать для чтения данных JSON из указанного Reader и их декодирования.
+Marshal(value)
+Эта функция кодирует указанное значение как JSON. Результатом является содержимое JSON, выраженное в виде среза байта, и error, указывающая на наличие проблем с кодировкой.
+Unmarshal(byteSlice, val)
+Эта функция анализирует данные JSON, содержащиеся в указанном срезе байтов, и присваивает результат указанному значению.
+**metods**
+Encode(val)
+Этот метод кодирует указанное значение как JSON и записывает его в Writer.
+SetEscapeHTML(on)
+Этот метод принимает bool аргумент, который, если он равен true, кодирует символы, экранирование которых в HTML было бы опасным. По умолчанию эти символы экранируются.
+SetIndent(prefix, indent)
+Этот метод задает префикс и отступ, которые применяются к имени каждого поля в выходных данных JSON.
+**Выражение основных типов данных Go в JSON**
+bool
+Значения Go bool выражаются как JSON true или false.
+string
+Строковые значения Go выражаются в виде строк JSON. По умолчанию небезопасные символы HTML экранируются.
+float32, float64
+Значения Go с плавающей запятой выражаются в виде чисел JSON.
+int, int<size>
+Целочисленные значения Go выражаются в виде чисел JSON.
+uint, uint<size>
+Целочисленные значения Go выражаются в виде чисел JSON.
+byte
+Байты Go выражаются в виде чисел JSON.
+rune
+Руны Go выражаются в виде чисел JSON.
+nil
+Значение Go nil выражается как null значение JSON.
+Pointers
+Кодер JSON следует указателям и кодирует значение в месте расположения указателя.
+### Example 1 range interface (типы в json)
+func main() {
+	var b bool = true
+	var str string = "Hello"
+	var fval float64 = 99.99
+	var ival int = 200
+	var pointer *int = &ival
+	var writer strings.Builder
+	encoder := json.NewEncoder(&writer)
+	for _, val := range []interface{}{b, str, fval, ival, pointer} {
+		encoder.Encode(val)
+	}
+	fmt.Print(writer.String())
+}
+## Кодирование массивов и срезов
+func main() {
+	names := []string{"Kayak", "Lifejacket", "Soccer Ball"}
+	numbers := [3]int{10, 20, 30}
+	var byteArray [5]byte
+	copy(byteArray[0:], []byte(names[0]))
+	byteSlice := []byte(names[0])
+	var writer strings.Builder
+	encoder := json.NewEncoder(&writer)
+	encoder.Encode(names)
+	encoder.Encode(numbers)
+	encoder.Encode(byteArray)
+	encoder.Encode(byteSlice)
+	fmt.Print(writer.String())
+}
+["Kayak","Lifejacket","Soccer Ball"]
+[10,20,30]
+[75,97,121,97,107]
+"S2F5YWs="
+## Map
+func main() {
+	m := map[string]float64{
+		"Kayak":      279,
+		"Lifejacket": 49.95,
+	}
+	var writer strings.Builder
+	encoder := json.NewEncoder(&writer)
+	encoder.Encode(m)
+	fmt.Print(writer.String())
+
+}
+## Настройка JSON-кодирования структур
+### Теги 
+type DiscountedProduct struct {
+    *Product `json:"product"`
+    Discount float64
+}
+#### Пропуск поля "-"
+package main
+type DiscountedProduct struct {
+    *Product          `json:"product"`
+     Discount float64 `json:"-"`
+}
+//{"product":null}
+#### Пропуск неназначенных полей "omitempty"
+type DiscountedProduct struct {
+	*Product `json:"product,omitempty"`
+	Discount float64 `json:"-"`
+}
+//{}
+#### Принудительное кодирование полей как строк ",string"
+type DiscountedProduct struct {
+	*Product `json:"product,omitempty"`
+	Discount float64 `json:",string"`
+}
+### Интерфейсы кодирования
+## MarshalJSON()
+MarshalJSON()
+Этот метод вызывается для создания JSON-представления значения и возвращает байтовый срез, содержащий JSON и error, указывающую на проблемы с кодировкой.
+## UnmarshalJSON(byteSlice)
+UnmarshalJSON(byteSlice)
+Этот метод вызывается для декодирования данных JSON, содержащихся в указанном байтовом срезе. Результатом является error, указывающая на проблемы с кодировкой.
+Decode(value)
+Этот метод считывает и декодирует данные, которые используются для создания указанного значения. Метод возвращает error, указывающую на проблемы с декодированием данных до требуемого типа или EOF.
+DisallowUnknownFields()
+По умолчанию при декодировании типа структуры Decoder игнорирует любой ключ в данных JSON, для которого нет соответствующего поля структуры. Вызов этого метода приводит к тому, что Decode возвращает ошибку, а не игнорирует ключ.
+UseNumber()
+По умолчанию числовые значения JSON декодируются в значения float64. При вызове этого метода вместо этого используется тип Number, как описано в разделе «Расшифровка числовых значений».
+## Example Json
+type Person struct {
+	Name     string `json:"pogonjalo"`
+	LastName string `json:"lastName"`
+	Age      int    `json:"years"`
+}
+
+func TakeJson(doc string) ([]Person, bool) {
+	var person []Person
+	jsonData, err := os.ReadFile(doc)
+	if err != nil {
+		fmt.Println(err)
+		return person, false
+	}
+	json.Unmarshal(jsonData, &person)
+	return person, true
+}
+
+// Устаревший подход
+func TakeJsonOpen(doc string) ([]Person, bool) {
+	jsonFile, err := os.Open(doc)
+	var person []Person
+	if err != nil {
+		fmt.Println(err)
+		return person, false
+	}
+	defer jsonFile.Close()
+
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+		return person, false
+	}
+	json.Unmarshal(byteValue, &person)
+	return person, true
+}
+
+// Marshaling
+
+func WriteJson(doc string, db []Person) {
+	byteArr, _ := json.MarshalIndent(db, "", "    ")
+	err := os.WriteFile(doc, byteArr, 0666) //-rw-rw-rw-
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+# 22 Файлы
+## two Readers os.Readfile os.Open Close
+// os.Readfile(pathfile)
+func OsReadfile(path string) {
+	dat, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(dat))
+}
+
+// Чтение с проверкой наличия и прав доступа
+// С использованием буфера
+func OsOpenAndRead(filepath string) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	b1 := make([]byte, 32)
+	n1, err := f.Read(b1)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(b1[:n1]))
+	f.Close()
+}
+
+func main() {
+	OsReadfile("text.txt")
+	OsOpenAndRead("text.txt")
+}
+## Чтение из определенного места
+### Theory
+ReadAt(slice, offset)
+Этот метод определяется интерфейсом ReaderAt и выполняет чтение в конкретный срез в указанном смещении позиции в файле.
+Seek(offset, how)
+Этот метод определяется интерфейсом Seeker и перемещает смещение в файл для следующего чтения. Смещение определяется комбинацией двух аргументов: первый аргумент указывает количество байтов для смещения, а второй аргумент определяет, как применяется смещение — значение 0 означает, что смещение относительно начала файла, значение 1 означает, что смещение относительно текущей позиции чтения, а значение 2 означает, что смещение относительно конца файла.
+#### Example ReadAt()
+func main() {
+	file, err := os.Open("file.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	buffer := make([]byte, 1024)
+	// offset - смещение на количество байт
+	offset := int64(5)
+
+	n, err := file.ReadAt(buffer, offset)
+	if err != nil && err != io.EOF {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Printf("Прочитано %d байт: %s\n", n, buffer[:n])
+}
+#### Example seek
+//После прочтения символов флажок смещается на
+//количество прочитанных символов
+
+func read(filepath string) {
+	//Получаем файл
+	f, err := os.Open(filepath)
+	check(err)
+
+	//Вычитываем первые 7 байт
+	b2 := make([]byte, 7)
+	n2, err := f.Read(b2)
+	check(err)
+	fmt.Printf("%s\n", string(b2[:n2])) //Hello
+
+	// Читаем Следующие 7 байт
+	b4 := make([]byte, 7)
+	n4, err := f.Read(b4)
+	check(err)
+	fmt.Println("n4 ", n4)         //n4  7
+	fmt.Printf("%s\n", string(b4)) //how are
+
+	// Смещение позиции чтения
+	//сместить на количество байт
+	//сместить можно вперёд или назад + -
+	//offset := int64(7)
+	offset := int64(-7)
+	//откуда - (0 - с начала, 1 - с текущей позиции, с конца)
+	whence := 2
+	_, err = f.Seek(offset, whence)
+	check(err)
+
+	// Читаем следующие 7 байт
+	b3 := make([]byte, 7)
+	n3, err := f.Read(b3)
+	check(err)
+	fmt.Printf("%s\n", string(b3[:n3])) //Hello
+
+	f.Close()
+}
+
+func main() {
+	read("test.txt")
+	//Hello
+	//how are you
+	//i'm well
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+## Запись в файлы
+### WriteFile, OpenFile
+#### Theory
+WriteFile(name, slice, modePerms)
+Эта функция создает файл с указанным именем, режимом и разрешениями и записывает содержимое указанного среза байтов. Если файл уже существует, его содержимое будет заменено байтовым срезом. Результатом является ошибка, сообщающая о любых проблемах с созданием файла или записью данных.
+OpenFile(name, flag, modePerms)
+Функция открывает файл с указанным именем, используя флаги для управления открытием файла. Если создается новый файл, применяются указанный режим и разрешения. Результатом является значение File, обеспечивающее доступ к содержимому файла, и ошибка, указывающая на проблемы с открытием файла.
+#### Example os.ReadFile, os.WriteFile, os.Create, file2.WriteString
+func main() {
+	// Читать файл
+	file, err := os.ReadFile("file.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(file))
+
+	//Создать и записать всё в один шаг
+	file0 := append([]byte("I'm osWriteFile\n"), file...)
+	err = os.WriteFile("osWriteFile.txt", file0, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	//Создать записать и закрыть
+	file2, err := os.Create("osCreate.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var sliceStr []string = strings.Split(string(file), "\n")
+
+	file2.WriteString("My name is metod.WriteStringа\n")
+	file2.WriteString(sliceStr[0])
+	file2.WriteString(sliceStr[2])
+	file2.Close()
+}
+### OpenFile Format flags (Умеет дописывать в конец файла)
+#### Format flags
+O_RDONLY
+Этот флаг открывает файл только для чтения, чтобы его можно было читать, но не записывать.
+O_WRONLY
+Этот флаг открывает файл только для записи, чтобы в него можно было писать, но нельзя было читать.
+O_RDWR
+Этот флаг открывает файл для чтения и записи, чтобы в него можно было записывать и читать.
+O_APPEND
+Этот флаг будет добавлять записи в конец файла.
+O_CREATE
+Этот флаг создаст файл, если он не существует.
+O_EXCL
+Этот флаг используется в сочетании с O_CREATE для обеспечения создания нового файла. Если файл уже существует, этот флаг вызовет ошибку.
+O_SYNC
+Этот флаг включает синхронную запись, так что данные записываются на устройство хранения до возврата из функции/метода записи.
+O_TRUNC
+Этот флаг усекает существующее содержимое в файле.
+#### Example
+func main() {
+	dataStr := fmt.Sprintln("Hello My name is os.Open \nI can open file and some else \nI use method.WriteString")
+	file, err := os.OpenFile("osOpen.txt",
+		os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err == nil {
+		defer file.Close()
+		file.WriteString(dataStr)
+	} else {
+		fmt.Printf("Error: %v", err.Error())
+	}
+} 
+### os.OpenFile methods
+#### Theory
+Seek(offset, how)
+Этот метод устанавливает местоположение для последующих операций.
+Write(slice)
+Этот метод записывает содержимое указанного среза байтов в файл. Результатом является количество записанных байтов и ошибка, указывающая на проблемы с записью данных.
+WriteAt(slice, offset)
+Этот метод записывает данные среза в указанное место и является аналогом метода ReadAt.
+WriteString(str)
+Этот метод записывает строку в файл. Это удобный метод, который преобразует строку в байтовый срез, вызывает метод Write и возвращает полученные результаты.
+#### Example os.Open(os.O_CREATE|os.O_RDWR), file.WriteString(str), file.Seek(10, 0), file.WriteAt
+func main() {
+	// Открываем файл "example.txt" в режиме
+	// os.O_CREATE - создания
+	// os.O_RDWR - записи и чтения
+	file, err := os.OpenFile("example.txt", os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	//Для создания строки желательно использовать fmt.Sprint
+	//str := "12345678 \n"
+	str := fmt.Sprintln("123456789")
+
+	//Записываем 10 байт
+	file.WriteString(str) //)
+
+	// Устанавливаем смещение в позицию 10
+	_, err = file.Seek(10, 0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Записываем данные в указанную позицию
+	_, err = file.WriteAt([]byte("Hello, World!"), 10)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("Данные успешно записаны в файл.")
+}
+### как удобно создать файл
+Create(name)
+Эта функция эквивалентна вызову OpenFile с флагами O_RDWR, O_CREATE и O_TRUNC. Результатом является File, который можно использовать для чтения и записи, и error, которая используется для обозначения проблем при создании файла. Обратите внимание, что эта комбинация флагов означает, что если файл с указанным именем существует, он будет открыт, а его содержимое будет удалено.
+CreateTemp(dirName, fileName)
+Эта функция создает новый файл в каталоге с указанным именем. Если имя представляет собой пустую строку, то используется системный временный каталог, полученный с помощью функции TempDir (описано в таблице 22-9). Файл создается с именем, которое содержит случайную последовательность символов, как показано в тексте после таблицы. Файл открывается с флагами O_RDWR, O_CREATE и O_EXCL. Файл не удаляется при закрытии.
+## Путь к файлу
+### Theory os
+Getwd()
+Эта функция возвращает текущий рабочий каталог, выраженный в виде строки, и error, указывающую на проблемы с получением значения.
+UserHomeDir()
+Эта функция возвращает домашний каталог пользователя и ошибку, указывающую на проблемы с получением пути.
+UserCacheDir()
+Эта функция возвращает каталог по умолчанию для пользовательских кэшированных данных и ошибку, указывающую на проблемы с получением пути.
+UserConfigDir()
+Эта функция возвращает каталог по умолчанию для пользовательских данных конфигурации и ошибку, указывающую на проблемы с получением пути.
+TempDir()
+Эта функция возвращает каталог по умолчанию для временных файлов и ошибку, указывающую на проблемы с получением пути.
+### Theory Функции path/filepath
+Abs(path)
+Эта функция возвращает абсолютный путь, что полезно, если у вас есть относительный путь, например имя файла.
+IsAbs(path)
+Эта функция возвращает true, если указанный путь является абсолютным.
+Base(path)
+Эта функция возвращает последний элемент пути.
+Clean(path)
+Эта функция очищает строки пути, удаляя повторяющиеся разделители и относительные ссылки.
+Dir(path)
+Эта функция возвращает все элементы пути, кроме последнего.
+EvalSymlinks(path)
+Эта функция оценивает символическую ссылку и возвращает результирующий путь.
+Ext(path)
+Эта функция возвращает расширение файла из указанного пути, который считается суффиксом после последней точки в строке пути.
+FromSlash(path)
+Эта функция заменяет каждую косую черту символом разделителя файлов платформы.
+ToSlash(path)
+Эта функция заменяет разделитель файлов платформы косой чертой.
+Join(...elements)
+Эта функция объединяет несколько элементов, используя файловый разделитель платформы.
+Match(pattern, path)
+Эта функция возвращает значение true, если путь соответствует указанному шаблону.
+Split(path)
+Эта функция возвращает компоненты по обе стороны от конечного разделителя пути в указанном пути.
+SplitList(path)
+Эта функция разбивает путь на компоненты, которые возвращаются в виде среза строки.
+VolumeName(path)
+Эта функция возвращает компонент тома указанного пути или пустую строку, если путь не содержит тома.
+### Example os.UserHomeDir()
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+func main() {
+	//возвращает домашний каталог пользователя и ошибку
+	path, err := os.UserHomeDir()
+	if err == nil {
+		path = filepath.Join(path, "MyApp", "MyTempFile.json")
+	}
+	Printfln("Full path: %v", path)
+	Printfln("Volume name: %v", filepath.VolumeName(path))
+	Printfln("Dir component: %v", filepath.Dir(path))
+	Printfln("File component: %v", filepath.Base(path))
+	Printfln("File extension: %v", filepath.Ext(path))
+}
+## Управление файлами и каталогами
+### Theory os
+Chdir(dir)
+Эта функция изменяет текущий рабочий каталог на указанный каталог. Результатом является error, указывающая на проблемы с внесением изменений.
+Mkdir(name, modePerms)
+Эта функция создает каталог с указанным именем и режимом/разрешениями. Результатом является error, равная нулю, если каталог создан, или описывающая проблему, если она возникает.
+MkdirAll(name, modePerms)
+Эта функция выполняет ту же задачу, что и Mkdir, но создает любые родительские каталоги по указанному пути.
+MkdirTemp(parentDir, name)
+Эта функция похожа на CreateTemp, но создает каталог, а не файл. Случайная строка добавляется в конец указанного имени или вместо звездочки, и новый каталог создается в указанном родительском каталоге. Результатами являются имя каталога и error, указывающая на проблемы.
+Remove(name)
+Эта функция удаляет указанный файл или каталог. Результатом является error, которая описывает любые возникающие проблемы.
+RemoveAll(name)
+Эта функция удаляет указанный файл или каталог. Если имя указывает каталог, то все содержащиеся в нем дочерние элементы также удаляются. Результатом является error, которая описывает любые возникающие проблемы.
+Rename(old, new)
+Эта функция переименовывает указанный файл или папку. Результатом является ошибка, которая описывает любые возникающие проблемы.
+Symlink(old, new)
+Эта функция создает символическую ссылку на указанный файл. Результатом является ошибка, которая описывает любые возникающие проблемы.
+### Example create and encode file long/path/file.json
+
+func main() {
+	path, err := os.UserHomeDir()
+	Printfln(path) //  /home/mvmir
+	if err == nil {
+		path = filepath.Join(path, "MyApp", "MyTempFile.json")
+	}
+	Printfln("Full path: %v", path) //  /home/mvmir/MyApp/MyTempFile.json
+	//filepath.Dir(path) - проверяет существование каталога
+	err = os.MkdirAll(filepath.Dir(path), 0766)
+	if err == nil {
+		file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0666)
+		if err == nil {
+			defer file.Close()
+			encoder := json.NewEncoder(file)
+			encoder.Encode(Products)
+		}
+	}
+	if err != nil {
+		Printfln("Error %v", err.Error())
+	}
+}
+
+type Product struct {
+	Name, Category string
+	Price          float64
+}
+
+var Products = []Product{
+	{"Kayak", "Watersports", 279},
+	{"Lifejacket", "Watersports", 49.95},
+	{"Soccer Ball", "Soccer", 19.50},
+	{"Corner Flags", "Soccer", 34.95},
+	{"Stadium", "Soccer", 79500},
+	{"Thinking Cap", "Chess", 16},
+	{"Unsteady Chair", "Chess", 75},
+	{"Bling-Bling King", "Chess", 1200},
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Изучение файловой системы
+### Theory
+ReadDir(name)
+Эта функция читает указанный каталог и возвращает срез DirEntry, каждый из которых описывает элемент в каталоге
+
+Stat(path)
+Эта функция принимает строку пути. Он возвращает значение FileInfo, описывающее файл, и error, указывающую на проблемы с проверкой файла.
+**methods**
+Name()
+Этот метод возвращает имя файла или каталога, описанного значением DirEntry.
+IsDir()
+Этот метод возвращает значение true, если значение DirEntry представляет каталог.
+Type()
+Этот метод возвращает значение FileMode, которое является псевдонимом uint32, который описывает файл больше и права доступа к файлу или каталогу, представленные значением DirEntry.
+Info()
+Этот метод возвращает значение FileInfo, которое предоставляет дополнительные сведения о файле или каталоге, представленном значением DirEntry.
+**methods интерфейс FileInfo**
+Name()
+Этот метод возвращает строку, содержащую имя файла или каталога.
+Size()
+Этот метод возвращает размер файла, выраженный в виде значения int64.
+Mode()
+Этот метод возвращает режим файла и настройки разрешений для файла или каталога.
+ModTime()
+Этот метод возвращает время последнего изменения файла или каталога.
+### Смотрим файлы в проэкте
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+func main() {
+	path, err := os.Getwd()
+	if err == nil {
+		dirEntries, err := os.ReadDir(path)
+		if err == nil {
+			for _, dentry := range dirEntries {
+				Printfln("Entry name: %v, IsDir: %v", dentry.Name(), dentry.IsDir())
+			}
+		}
+	}
+	if err != nil {
+		Printfln("Error %v", err.Error())
+	}
+}
+## Определение существования файла
+func main() {
+	targetFiles := []string{"no_such_file.txt", "config.json"}
+	for _, name := range targetFiles {
+		info, err := os.Stat(name)
+		if os.IsNotExist(err) {
+			Printfln("File does not exist: %v", name)
+		} else if err != nil {
+			Printfln("Other error: %v", err.Error())
+		} else {
+			Printfln("File %v, Size: %v", info.Name(), info.Size())
+		}
+	}
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Поиск файлов с помощью шаблона
+### Theory функций path/filepath
+Match(pattern, name)
+Эта функция сопоставляет один путь с шаблоном. Результатом является bool значение, указывающее на наличие совпадения, и error, указывающая на проблемы с шаблоном или с выполнением совпадения.
+Glob(pathPatten)
+Эта функция находит все файлы, соответствующие указанному шаблону. Результатом является string срез, содержащий совпавшие пути и ошибку, указывающую на проблемы с выполнением поиска.
+### Синтаксис шаблона поиска для функций path/filepath
+*
+Этот термин соответствует любой последовательности символов, кроме разделителя пути.
+?
+Этот термин соответствует любому одиночному символу, за исключением разделителя пути.
+[a-Z]
+Этот термин соответствует любому символу в указанном диапазоне.
+### Найти файл .json и показать путь (внутри проэкта) по шаблону  filepath.Glob(filepath.Join(path, "*.json"))
+func main() {
+	path, err := os.Getwd()
+	if err == nil {
+		matches, err := filepath.Glob(filepath.Join(path, "*.json"))
+		if err == nil {
+			for _, m := range matches {
+				Printfln("Match: %v", m)
+			}
+		}
+	}
+	if err != nil {
+		Printfln("Error %v", err.Error())
+	}
+}
+## Обработка всех файлов в каталоге Получить Path and size
+### WalkDir
+WalkDir(directory, func)
+Эта функция вызывает указанную функцию для каждого файла и каталога в указанном каталоге.
 ### 
+func callback(path string, dir os.DirEntry, dirErr error) (err error) {
+	info, _ := dir.Info()
+	Printfln("Path %v, Size: %v", path, info.Size())
+	return
+}
+
+func main() {
+	path, err := os.Getwd()
+	if err == nil {
+		err = filepath.WalkDir(path, callback)
+	} else {
+		Printfln("Error %v", err.Error())
+	}
+}
+# 23 HTML и текстовые шаблоны
+## Функции html/template для загрузки файлов шаблонов
+ParseFiles(...files)
+Эта функция загружает один или несколько файлов, которые указаны по имени. Результатом является Template, который можно использовать для создания контента, и error, сообщающая о проблемах с загрузкой шаблонов.
+ParseGlob(pattern)
+Эта функция загружает один или несколько файлов, выбранных с помощью шаблона. Результатом является Template, который можно использовать для создания контента, и error, сообщающая о проблемах с загрузкой шаблонов.
+## Шаблонные методы для выбора и выполнения шаблонов
+Templates()
+Эта функция возвращает срез, содержащий указатели на загруженные значения Template.
+Lookup(name)
+Эта функция возвращает *Template для указанного загруженного шаблона.
+Name()
+Этот метод возвращает имя Template.
+Execute(writer, data)
+Эта функция выполняет Template, используя указанные данные, и записывает вывод в указанный Writer.
+ExecuteTemplate(writer, templateName, data)
+Эта функция выполняет шаблон с указанным именем и данными и записывает вывод в указанный Writer.
+## Загрузка нескольких шаблонов
+func main() {
+	allTemplates, err1 := template.ParseFiles("templates/template.html",
+		"templates/extras.html")
+	if err1 == nil {
+		allTemplates.ExecuteTemplate(os.Stdout, "template.html", &Kayak)
+		os.Stdout.WriteString("\n")
+		allTemplates.ExecuteTemplate(os.Stdout, "extras.html", &Kayak)
+	} else {
+		Printfln("Error: %v %v", err1.Error())
+	}
+}
+## Перечисление загруженных шаблонов
+func main() {
+	allTemplates, err := template.ParseGlob("templates/*.html")
+	if err == nil {
+		for _, t := range allTemplates.Templates() {
+			Printfln("Template name: %v", t.Name())
+		}
+	} else {
+		Printfln("Error: %v %v", err.Error())
+	}
+}
+## Поиск определенного шаблона
+func Exec(t *template.Template) error {
+	return t.Execute(os.Stdout, &Kayak)
+}
+func main() {
+	allTemplates, err := template.ParseGlob("templates/*.html")
+	if err == nil {
+		selectedTemplated := allTemplates.Lookup("template.html")
+		err = Exec(selectedTemplated)
+	}
+	if err != nil {
+		Printfln("Error: %v %v", err.Error())
+	}
+}
+## Понимание действий шаблона
+{{ value }}
+{{ expr }}
+Это действие вставляет значение данных или результат выражения в шаблон. Точка используется для ссылки на значение данных, переданное функции Execute или ExecuteTemplate. Подробнее см. в разделе «Вставка значений данных».
+{{ value.fieldname }}
+Это действие вставляет значение поля структуры. Подробнее см. в разделе «Вставка значений данных».
+{{ value.method arg }}
+Это действие вызывает метод и вставляет результат в выходные данные шаблона. Скобки не используются, а аргументы разделяются пробелами. Подробнее см. в разделе «Вставка значений данных».
+{{ func arg }}
+Это действие вызывает функцию и вставляет результат в выходные данные. Существуют встроенные функции для общих задач, таких как форматирование значений данных, и могут быть определены пользовательские функции, как описано в разделе «Определение функций шаблона».
+{{ expr | value.method }}
+{{ expr | func
+Выражения можно объединять в цепочку с помощью вертикальной черты, чтобы результат первого выражения использовался в качестве последнего аргумента во втором выражении.
+{{ range value }}
+...
+{{ end }}
+Это действие выполняет итерацию по указанному срезу и добавляет содержимое между ключевым словом range и end для каждого элемента. Действия во вложенном содержимом выполняются с текущим элементом, доступным через точку. Дополнительные сведения см. в разделе «Использование срезов в шаблонах».
+{{ range value }}
+...
+{{ else }}
+...
+{{ end }}
+Это действие похоже на комбинацию range/end, но определяет раздел вложенного содержимого, который используется, если срез не содержит элементов. This action is similar to the range/end combination but defines a section of nested content that is used if the slice contains no elements.
+{{ if expr }}
+...
+{{ end }}
+Это действие оценивает выражение и выполняет содержимое вложенного шаблона, если результат true, как показано в разделе «Условное выполнение содержимого шаблона». Это действие можно использовать с необязательными предложениями else и else if.
+{{ with expr }}
+...
+{{ end }}
+Это действие оценивает выражение и выполняет содержимое вложенного шаблона, если результат не равен nil или пустой строке. Это действие можно использовать с дополнительными предложениями.
+{{ define "name" }}
+...
+{{ end }}
+Это действие определяет шаблон с указанным именем
+{{ template "name" expr }}
+Это действие выполняет шаблон с указанным именем и данными и вставляет результат в выходные данные.
+{{ block "name" expr }}
+...
+{{ end }}
+Это действие определяет шаблон с указанным именем и вызывает его с указанными данными. Обычно это используется для определения шаблона, который можно заменить шаблоном, загруженным из другого файла, как показано в разделе «Определение блоков шаблона».
+## Вставка значений данных
+.
+Это выражение вставляет значение, переданное методу Execute или ExecuteTemplate, в выходные данные шаблона.
+.Field
+Это выражение вставляет значение указанного поля в выходные данные шаблона.
+.Method
+Это выражение вызывает указанный метод без аргументов и вставляет результат в выходные данные шаблона.
+.Method arg
+Это выражение вызывает указанный метод с указанным аргументом и вставляет результат в выходные данные шаблона.
+call .Field arg
+Это выражение вызывает поле функции структуры, используя указанные аргументы, разделенные пробелами. Результат функции вставляется в вывод шаблона.
+## Форматирование значений данных
+### Встроенные функции шаблонов для форматирования данных
+print
+Это псевдоним функции fmt.Sprint.
+printf
+Это псевдоним функции fmt.Sprintf.
+println
+Это псевдоним функции fmt.Sprintln.
+html
+Эта функция кодирует значение для безопасного включения в документ HTML.
+js
+Эта функция кодирует значение для безопасного включения в документ JavaScript.
+urlquery
+Эта функция кодирует значение для использования в строке запроса URL.
+### Цепочки и скобки шаблонных выражений
+### Обрезка пробелов
+## **Если вдруг понадобятся html или текстовые шаблоны - глава 23 proffesional go...**
+# 24 HTTP Сервер
+## Simple server Hello World
+type StringHandler struct {
+	message string
+}
+
+func (sh StringHandler) ServeHTTP(writer http.ResponseWriter,
+	request *http.Request) {
+	io.WriteString(writer, sh.message)
+}
+
+func main() {
+	err := http.ListenAndServe(":5000", StringHandler{message: "Hello, World"})
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+## Создание прослушивателя и обработчика HTTP
+### Theory http.ListenAndServe
+ListenAndServe(addr, handler)
+Эта функция начинает прослушивать HTTP-запросы по указанному адресу и передает запросы указанному обработчику.
+ListenAndServeTLS(addr, cert, key, handler)
+Эта функция начинает прослушивать HTTPS-запросы. Аргументы - это адрес
+**Method**
+ServeHTTP(writer, request)
+Этот метод вызывается для обработки HTTP-запроса. Запрос описывается значением Request, а ответ записывается с использованием ResponseWriter, оба из которых принимаются в качестве параметров.
+**Проверка запроса**
+Method
+В этом поле указывается метод HTTP (GET, POST и т. д.) в виде строки. Пакет net/http определяет константы для методов HTTP, таких как MethodGet и MethodPost.
+URL
+Это поле возвращает запрошенный URL-адрес, выраженный в виде URL значения.
+Proto
+Это поле возвращает string, указывающую версию HTTP, используемую для запроса.
+Host
+Это поле возвращает string, содержащую запрошенный хост.
+Header
+Это поле возвращает значение Header, которое является псевдонимом для map[string][]string и содержит заголовки запроса. Ключи карты — это имена заголовков, а значения — срезы строк, содержащие значения заголовков.
+Trailer
+Это поле возвращает строку map[string], содержащую любые дополнительные заголовки, включенные в запрос после тела.
+Body
+Это поле возвращает ReadCloser, представляющий собой интерфейс, сочетающий метод Read интерфейса Reader с методом Close интерфейса Closer, оба из которых описаны в главе 22.
+### request.Methods (что можно прочитать у отправителя запроса на сервер) /favicon.ico
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+type StringHandler struct {
+	message string
+}
+
+func (sh StringHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	Printfln("Method: %v", request.Method)
+	Printfln("URL: %v", request.URL)
+	Printfln("HTTP Version: %v", request.Proto)
+	Printfln("Host: %v", request.Host)
+	for name, val := range request.Header {
+		Printfln("Header: %v, Value: %v", name, val)
+	}
+	Printfln("---")
+	io.WriteString(writer, sh.message)
+}
+func main() {
+	err := http.ListenAndServe(":5000", StringHandler{message: "Hello, World"})
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+## Фильтрация запросов и генерация ответов
+### Theory
+Scheme
+Это поле возвращает компонент схемы URL.
+Host
+Это поле возвращает хост-компонент URL-адреса, который может включать порт.
+RawQuery
+Это поле возвращает строку запроса из URL-адреса. Используйте метод Query для преобразования строки запроса в карту.
+Path
+Это поле возвращает компонент пути URL-адреса.
+Fragment
+Это поле возвращает компонент фрагмента URL без символа #.
+Hostname()
+Этот метод возвращает компонент имени хоста URL-адреса в виде string.
+Port()
+Этот метод возвращает компонент порта URL-адреса в виде string.
+Query()
+Этот метод возвращает строку map[string][]string (карту со строковыми ключами и строковыми значениями срезов), содержащую поля строки запроса.
+User()
+Этот метод возвращает информацию о пользователе, связанную с запросом, как описано в главе 30.
+String()
+Этот метод возвращает string представление URL-адреса.
+**Метод ResponseWriter**
+Header()
+Этот метод возвращает Header, который является псевдонимом для map[string][]string, который можно использовать для установки заголовков ответа.
+WriteHeader(code)
+Этот метод устанавливает код состояния для ответа, заданного как int. Пакет net/http определяет константы для большинства кодов состояния.
+Write(data)
+Этот метод записывает данные в тело ответа и реализует интерфейс Writer.
+### if request.URL.Path == "/favicon.ico" 
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+type StringHandler struct {
+	message string
+}
+
+func (sh StringHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	if request.URL.Path == "/favicon.ico" {
+		Printfln("Request for icon detected - returning 404")
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+	Printfln("Request for %v", request.URL.Path)
+	io.WriteString(writer, sh.message)
+}
+func main() {
+	err := http.ListenAndServe(":5000", StringHandler{message: "Hello, World"})
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+## Использование удобных функций ответа
+### Theory
+Error(writer, message, code)
+Эта функция устанавливает для заголовка указанный код, устанавливает для заголовка Content-Type значение text/plain и записывает сообщение об ошибке в ответ. Заголовок X-Content-Type-Options также настроен так, чтобы браузеры не могли интерпретировать ответ как что-либо, кроме текста.
+NotFound(writer, request)
+Эта функция вызывает Error и указывает код ошибки 404.
+Redirect(writer, request, url, code)
+Эта функция отправляет ответ о перенаправлении на указанный URL-адрес и с указанным кодом состояния.
+ServeFile(writer, request, fileName)
+Эта функция отправляет ответ, содержащий содержимое указанного файла. Заголовок Content-Type устанавливается на основе имени файла, но его можно переопределить, явно установив заголовок перед вызовом функции. См. раздел «Создание статического HTTP-сервера» для примера, который обслуживает файлы.
+### Redirect
+type StringHandler2 struct {
+	message string
+}
+
+//Redirect
+
+func (sh StringHandler2) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	Printfln("Request for %v", request.URL.Path)
+	switch request.URL.Path {
+	case "/favicon.ico":
+		http.NotFound(writer, request)
+	case "/message":
+		io.WriteString(writer, sh.message)
+	default:
+		http.Redirect(writer, request, "/message", http.StatusTemporaryRedirect)
+	}
+}
+
+func ServeHTTPAnswer() {
+	err := http.ListenAndServe(":5000", StringHandler2{message: "Hello, World"})
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+
+//http://localhost:5000/
+## Использование обработчика Handle
+### Theory 
+**Функции net/http для создания правил маршрутизации**
+Handle(pattern, handler)
+Эта функция создает правило, которое вызывает указанный метод ServeHTTP указанного Handler для запросов, соответствующих шаблону.
+HandleFunc(pattern, handlerFunc)
+Эта функция создает правило, которое вызывает указанную функцию для запросов, соответствующих шаблону. Функция вызывается с аргументами ResponseWriter и Request.
+**net/http Functions for Creating Request Handlers**
+FileServer(root)
+Эта функция создает Handler, который выдает ответы с помощью функции ServeFile. См. раздел «Создание статического HTTP-сервера» для примера, который обслуживает файлы.
+NotFoundHandler()
+Эта функция создает Handler, который выдает ответы с помощью функции NotFound.
+RedirectHandler(url, code)
+Эта функция создает Handler, который выдает ответы с помощью функции Redirect.
+StripPrefix(prefix, handler)
+Эта функция создает Handler, который удаляет указанный префикс из URL-адреса запроса и передает запрос указанному Handler. Подробнее см. в разделе «Создание статического HTTP-сервера».
+TimeoutHandler(handler, duration, message)
+Эта функция передает запрос указанному Handler, но генерирует ответ об ошибке, если ответ не был получен в течение указанного времени.
+### Example
+type StringHandler3 struct {
+	message string
+}
+
+//Redirect
+
+func (sh StringHandler3) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	Printfln("Request for %v", request.URL.Path)
+	io.WriteString(writer, sh.message)
+}
+
+func ServeHTTPHandle() {
+	http.Handle("/message", StringHandler{"Hello, World"})
+	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.Handle("/", http.RedirectHandler("/message", http.StatusTemporaryRedirect))
+
+	err := http.ListenAndServe(":5000", StringHandler2{message: "Hello, World"})
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+## Поддержка HTTPS-запросов (security)
+### Simple
+package main
+
+import (
+	"io"
+	"net/http"
+)
+
+// Самоподписанные
+// https://getacert.com/cert/selfcert.pl?SID=f5iFEc4e7d4G1C3E1dd9331i
+
+type StringHandler struct {
+	message string
+}
+
+func (sh StringHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	Printfln("Request for %v", request.URL.Path)
+	io.WriteString(writer, sh.message)
+}
+
+func ServeHTTPs() {
+	http.Handle("/message", StringHandler{"Hello, World"})
+	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.Handle("/", http.RedirectHandler("/message", http.StatusTemporaryRedirect))
+
+	go func() {
+		err := http.ListenAndServeTLS(":5500", "certificate.cer",
+			"certificate.key", nil)
+		if err != nil {
+			Printfln("HTTPS Error: %v", err.Error())
+		}
+	}()
+
+	err := http.ListenAndServe(":5000", StringHandler{message: "Hello, World"})
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+
+//http://localhost:5000/
+
+//https://localhost:5500
+### http.HandlerFunc(HTTPSRedirect)
+// Самоподписанные
+// https://getacert.com/cert/selfcert.pl?SID=f5iFEc4e7d4G1C3E1dd9331i
+
+type StringHandler struct {
+	message string
+}
+
+func (sh StringHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	Printfln("Request for %v", request.URL.Path)
+	io.WriteString(writer, sh.message)
+}
+
+func HTTPSRedirect(writer http.ResponseWriter,
+	request *http.Request) {
+	host := strings.Split(request.Host, ":")[0]
+	target := "https://" + host + ":5500" + request.URL.Path
+	if len(request.URL.RawQuery) > 0 {
+		target += "?" + request.URL.RawQuery
+	}
+	http.Redirect(writer, request, target, http.StatusTemporaryRedirect)
+}
+
+func ServeHTTPs() {
+	http.Handle("/message", StringHandler{"Hello, World"})
+	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.Handle("/", http.RedirectHandler("/message", http.StatusTemporaryRedirect))
+
+	go func() {
+		err := http.ListenAndServeTLS(":5500", "certificate.cer",
+			"certificate.key", nil)
+		if err != nil {
+			Printfln("HTTPS Error: %v", err.Error())
+		}
+	}()
+
+	err := http.ListenAndServe(":5000", http.HandlerFunc(HTTPSRedirect))
+	if err != nil {
+		Printfln("Error: %v", err.Error())
+	}
+}
+
+//http://localhost:5000/
+
+//https://localhost:5500
+## Создание статического HTTP-сервера
+curl https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css --output static/bootstrap.min.css
+**установка и обработка html + настройка хендлера для работы с html**
+fsHandler := http.FileServer(http.Dir("./static"))
+    http.Handle("/files/", http.StripPrefix("/files", fsHandler))
+### Использование шаблонов для генерации ответов
 
 
 
@@ -4430,6 +5529,20 @@ func main() {
 
 
 
+
+
+
+
+
+#
+
+
+
+
+
+
+
+## 
 # Куча (heap) & стек (stack)
 ***"куча"** (англ. heap) — это область памяти, которая используется для **динамического** выделения памяти в процессе выполнения программы. Куча используется для хранения данных, которые могут быть выделены и освобождены во время выполнения программы **в произвольном порядке**.
 

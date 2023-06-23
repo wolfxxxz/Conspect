@@ -1,22 +1,77 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
+func ScanStringOneNewReader() (string, error) {
+	fmt.Print("       ...")
+	in := bufio.NewScanner(os.Stdin)
+	if in.Scan() {
+		return in.Text(), nil
+	}
+	if err := in.Err(); err != nil {
+		return "", err
+	}
+	return "", nil
+}
+func ScanReaderReadString() (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Введите строку: ")
+	//Читает до ограничителя
+	input, err := reader.ReadString('7') //if '\n' до ввода
+	if err != nil {
+		return "", err
+	}
+	return input, nil
+
+}
+
+func ScanSplit() (string, error) {
+	in := bufio.NewScanner(os.Stdin)
+	in.Split(bufio.ScanLines)
+	//in.Split(bufio.ScanWords)
+
+	fmt.Print("Введите строку: ")
+	if in.Scan() {
+		return in.Text(), nil
+	}
+	if err := in.Err(); err != nil {
+		return "", err
+	}
+	return "", nil
+}
 func main() {
 
-	// Инициализируем мапу, где ключ - это название категории, а значение - это список строк
-	productsByCategory := make(map[string][]string)
+}
 
-	// Добавляем продукты в мапу
-	productsByCategory["fruits"] = []string{"apple", "banana", "orange"}
-	productsByCategory["vegetables"] = []string{"carrot", "potato", "cucumber"}
-	productsByCategory["meat"] = []string{"beef", "pork", "chicken"}
+/*
+	str, err := ScanSplit()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+}
 
-	// Обращаемся к элементам мапы по ключу и работаем со срезом
-	fmt.Println(productsByCategory["fruits"][0])       // Выведет "apple"
-	fmt.Println(len(productsByCategory["vegetables"])) // Выведет 3
+/*
+	str, err := ScanReaderReadString() //ыаывавы 7 авпва
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str) //ыаывавы 7
+}
 
-	// Изменяем срез в мапе
-	productsByCategory["meat"] = append(productsByCategory["meat"], "lamb")
-	fmt.Println(productsByCategory["meat"]) // Выведет [beef pork chicken lamb]
+/*
+		str, err := ScanStringOneNewReader()
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(str)
+}*/
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
 }
