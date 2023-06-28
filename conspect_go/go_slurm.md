@@ -2682,7 +2682,38 @@ func GetEnv() {
 	fmt.Println(port) //8080
 	fmt.Println(path) //get/go/next
 }
-### Toml 
+### Toml
+import (
+	"fmt"
+	"os"
+
+	"github.com/BurntSushi/toml"
+)
+
+type Person struct {
+	Name string `toml:"name"`
+}
+
+func ReadToml() {
+
+	var name Person
+	_, err := toml.DecodeFile("api.toml", &name)
+	if err != nil || name.Name == "" {
+		file2, err := os.Create("api.toml")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		name2 := Person{Name: "sergio"}
+
+		if err := toml.NewEncoder(file2).Encode(name2); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
+}
+### Toml2 
 import (
 	"fmt"
 	"log"

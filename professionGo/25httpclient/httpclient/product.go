@@ -15,3 +15,11 @@ var Products = []Product{
 	{"Unsteady Chair", "Chess", 75},
 	{"Bling-Bling King", "Chess", 1200},
 }
+
+/*
+func (p *Product) AddTax() float64 {
+	return p.Price * 1.2
+}
+func (p *Product) ApplyDiscount(amount float64) float64 {
+	return p.Price - amount
+}*/

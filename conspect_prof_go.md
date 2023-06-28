@@ -1819,6 +1819,47 @@ func (p *Product) calcTax(rate, threshold float64) float64 {
 func main() {
 	Product.printDetails(Product{"Kayak", "Watersports", 275})
 }
+## Псевдоним типа Пример с prepend
+type Man struct {
+	name string
+}
+
+func NewMan(m string) Man {
+	return Man{name: m}
+}
+
+// Псевдоним типа
+type ManyMen []Man
+
+// Новый псевдоним
+func NewManyMen(m Man) *ManyMen {
+	return &ManyMen{m}
+}
+
+// Append
+func (many *ManyMen) AppendMan(man Man) {
+	*many = append(*many, man)
+}
+
+// Prepend
+func (many *ManyMen) Prepend(man Man) {
+	SliceMan := NewManyMen(man)
+	*many = append(*SliceMan, *many...)
+}
+
+func main() {
+	first := NewMan("Igor")
+	second := NewMan("Bodja")
+
+	men := NewManyMen(first)
+	men.AppendMan(second)
+
+	fmt.Println(*men)
+
+	third := NewMan("Sergio")
+	men.Prepend(third)
+	fmt.Println(*men)
+}
 ## Псевдоним типа и метод для него
 type Product struct {
 	name, category string
@@ -5515,10 +5556,994 @@ curl https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css --o
 fsHandler := http.FileServer(http.Dir("./static"))
     http.Handle("/files/", http.StripPrefix("/files", fsHandler))
 ### Использование шаблонов для генерации ответов
+...
+# 25 HTTP Client
+## Отправка простых HTTP-запросов
+Get(url)
+Эта функция отправляет запрос GET на указанный URL-адрес HTTP или HTTPS. Результатом являются ответ и error, сообщающая о проблемах с запросом.
+Head(url)
+Эта функция отправляет запрос HEAD на указанный URL-адрес HTTP или HTTPS. Запрос HEAD возвращает заголовки, которые были бы возвращены для запроса GET. Результатом являются Response и error, сообщающая о проблемах с запросом.
+Post(url, contentType, reader)
+Эта функция отправляет запрос POST на указанный URL-адрес HTTP или HTTPS с указанным значением заголовка Content-Type. Содержимое формы предоставляется указанным Reader. Результатом являются Response и error, сообщающая о проблемах с запросом.
+PostForm(url, data)
+Эта функция отправляет запрос POST на указанный URL-адрес HTTP или HTTPS с заголовком Content-Type, установленным в application/x-www-form-urlencoded. Содержимое формы предоставляется с помощью map[string][]string. Результатом являются Response и error, сообщающая о проблемах с запросом.
+## Структура Response описывает ответ
+StatusCode
+Это поле возвращает код состояния ответа, выраженный как int.
+Status
+Это поле возвращает string, содержащую описание статуса.
+Proto
+Это поле возвращает string, содержащую ответный HTTP-протокол.
+Header
+Это поле возвращает строку map[string][]string, содержащую заголовки ответа.
+Body
+Это поле возвращает ReadCloser, который является Reader, определяющим метод Close и обеспечивающим доступ к телу ответа.
+Trailer
+Это поле возвращает строку map[string][]string, содержащую трейлеры ответов.
+ContentLength
+Это поле возвращает значение заголовка Content-Length, преобразованное в значение int64.
+TransferEncoding
+Это поле возвращает набор значений заголовка Transfer-Encoding.
+Close
+Это логическое поле возвращает значение true, если ответ содержит заголовок Connection, для которого установлено значение close, что указывает на то, что HTTP-соединение должно быть закрыто.
+Uncompressed
+Это поле возвращает значение true, если сервер отправил сжатый ответ, который был распакован пакетом net/http.
+Request
+Это поле возвращает Request, который использовался для получения ответа. Структура Request
+TLS
+В этом поле содержится информация о соединении HTTPS.
+Cookies()
+Этот метод возвращает []*Cookie, который содержит заголовки Set-Cookie в ответе. Структура Cookie описана в главе 24.
+Location
+Этот метод возвращает URL-адрес из ответа заголовка Location и error, указывающую, что ответ не содержит этот заголовок.
+Write(writer)
+Этот метод записывает сводку ответа на указанный Writer.
+## Write
+//Метод Write удобен, когда вы просто хотите увидеть ответ, но большинство проектов проверяют код состояния, чтобы убедиться, что запрос был успешным, а затем считывают тело ответа
 
+func main() {
+    go http.ListenAndServe(":5000", nil)
+    time.Sleep(time.Second)
+    response, err := http.Get("http://localhost:5000/html")
+    if (err == nil && response.StatusCode == http.StatusOK) {
+        data, err := io.ReadAll(response.Body)
+        if (err == nil) {
+            defer response.Body.Close()
+            os.Stdout.Write(data)
+        }
+    } else {
+        Printfln("Error: %v, Status Code: %v", err.Error(), response.StatusCode)
+    }
+}
+### write and decode json
+func main() {
+	Printfln("Starting HTTP Server")
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
+	response, err := http.Get("http://localhost:5000/json")
+	if err == nil && response.StatusCode == http.StatusOK {
+		defer response.Body.Close()
+		data := []Product{}
+		err = json.NewDecoder(response.Body).Decode(&data)
+		if err == nil {
+			for _, p := range data {
+				Printfln("Name: %v, Price: $%.2f", p.Name, p.Price)
+			}
+		} else {
+			Printfln("Decode error: %v", err.Error())
+		}
+	} else {
+		Printfln("Error: %v, Status Code: %v", err.Error(), response.StatusCode)
+	}
+}
+## Отправка POST-запросов
+func main() {
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
+	formData := map[string][]string{
+		"name":     {"Kayak "},
+		"category": {"Watersports"},
+		"price":    {"279"},
+	}
+	response, err := http.PostForm("http://localhost:5000/echo", formData)
+	if err == nil && response.StatusCode == http.StatusOK {
+		io.Copy(os.Stdout, response.Body)
+		defer response.Body.Close()
+	} else {
+		Printfln("Error: %v, Status Code: %v", err.Error(), response.StatusCode)
+	}
+}
+## Настройка запросов HTTP-клиента
+### Клиентские поля и методы
+Transport
+Это поле используется для выбора транспорта, который будет использоваться для отправки HTTP-запроса. Пакет net/http предоставляет транспорт по умолчанию.
+CheckRedirect
+Это поле используется для указания пользовательской политики для обработки повторяющихся перенаправлений, как описано в разделе «Управление перенаправлениями».
+Jar
+Это поле возвращает файл CookieJar, который используется для управления файлами cookie, как описано в разделе «Работа с файлами cookie».
+Timeout
+Это поле используется для установки тайм-аута для запроса, указанного как time.Duration.
+Do(request)
+Этот метод отправляет указанный Request, возвращая Response и error, указывающую на проблемы с отправкой запроса.
+CloseIdleConnections()
+Этот метод закрывает все бездействующие HTTP-запросы, которые в настоящее время открыты и не используются.
+Get(url)
+Этот метод вызывается функцией Get, описанной в таблице 25-3.
+Head(url)
+Этот метод вызывается функцией Head, описанной в таблице 25-3.
+Post(url, contentType, reader)
+Этот метод вызывается функцией Post, описанной в таблице 25-3.
+PostForm(url, data)
+Этот метод вызывается функцией PostForm, описанной в таблице 25-3.
+**Полезные поля и методы запроса**
+Method
+Это строковое поле указывает метод HTTP, который будет использоваться для запроса. Пакет net/http определяет константы для методов HTTP, таких как MethodGet и MethodPost.
+URL
+В этом поле URL указывается URL-адрес, на который будет отправлен запрос. Структура URL определена в главе 24.
+Header
+Это поле используется для указания заголовков запроса. Заголовки указываются в map[string][]string, и поле будет nil, когда значение Request создается с использованием синтаксиса литеральной структуры.
+ContentLength
+Это поле используется для установки заголовка Content-Length с использованием значения int64.
+TransferEncoding
+Это поле используется для установки заголовка Transfer-Encoding с использованием среза строк.
+Body
+Это поле ReadCloser указывает источник тела запроса. Если у вас есть Reader, который не определяет метод Close, то можно использовать функцию io.NopCloser для создания ReadCloser, метод Close которого ничего не делает.
+**Функция для анализа значений URL**
+Parse(string)
+Этот метод анализирует string в URL. Результатами являются значение URL и error, указывающая на проблемы с разбором string.
+### Example
+func main() {
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
+	var builder strings.Builder
+	err := json.NewEncoder(&builder).Encode(Products[0])
+	if err == nil {
+		reqURL, err := url.Parse("http://localhost:5000/echo")
+		if err == nil {
+			req := http.Request{
+				Method: http.MethodPost,
+				URL:    reqURL,
+				Header: map[string][]string{
+					"Content-Type": {"application.json"},
+				},
+				Body: io.NopCloser(strings.NewReader(builder.String())),
+			}
+			response, err := http.DefaultClient.Do(&req)
+			if err == nil && response.StatusCode == http.StatusOK {
+				io.Copy(os.Stdout, response.Body)
+				defer response.Body.Close()
+			} else {
+				Printfln("Request Error: %v", err.Error())
+			}
+		} else {
+			Printfln("Parse Error: %v", err.Error())
+		}
+	} else {
+		Printfln("Encoder Error: %v", err.Error())
+	}
+}
+## Использование удобных функций для создания запроса
+### Удобные функции net/http для создания запросов
+NewRequest(method, url, reader)
+Эта функция создает новый Reader, настроенный с указанным методом, URL-адресом и телом. Функция также возвращает ошибку, указывающую на проблемы с созданием значения, включая синтаксический анализ URL-адреса, выраженного в виде строки.
+NewRequestWithContext(context, method, url, reader)
+Эта функция создает новый Reader, который будет отправлен в указанном контексте. Контексты описаны в главе 30.
+### Example
+func main() {
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
+	var builder strings.Builder
+	err := json.NewEncoder(&builder).Encode(Products[0])
+	if err == nil {
+		req, err := http.NewRequest(http.MethodPost, "http://localhost:5000/echo",
+			io.NopCloser(strings.NewReader(builder.String())))
+		if err == nil {
+			req.Header["Content-Type"] = []string{"application/json"}
+			response, err := http.DefaultClient.Do(req)
+			if err == nil && response.StatusCode == http.StatusOK {
+				io.Copy(os.Stdout, response.Body)
+				defer response.Body.Close()
+			} else {
+				Printfln("Request Error: %v", err.Error())
+			}
+		} else {
+			Printfln("Request Init Error: %v", err.Error())
+		}
+	} else {
+		Printfln("Encoder Error: %v", err.Error())
+	}
+}
+## Работа с файлами cookie
+### Методы, определяемые интерфейсом CookieJar
+SetCookies(url, cookies)
+Этот метод сохраняет срез *Cookie для указанного URL-адреса.
+Cookes(url)
+Этот метод возвращает срез *Cookie, содержащий файлы cookie, которые должны быть включены в запрос для указанного URL-адреса.
 
+New(options)
+Эта функция создает новый CookieJar, настроенный с помощью структуры Options, описанной далее. Функция также возвращает error, сообщающую о проблемах с созданием jar.
+### Example
+// Cookie
+func main() {
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
+	jar, err := cookiejar.New(nil)
+	if err == nil {
+		http.DefaultClient.Jar = jar
+	}
+	for i := 0; i < 3; i++ {
+		req, err := http.NewRequest(http.MethodGet,
+			"http://localhost:5000/cookie", nil)
+		if err == nil {
+			response, err := http.DefaultClient.Do(req)
+			if err == nil && response.StatusCode == http.StatusOK {
+				io.Copy(os.Stdout, response.Body)
+				defer response.Body.Close()
+			} else {
+				Printfln("Request Error: %v", err.Error())
+			}
+		} else {
+			Printfln("Request Init Error: %v", err.Error())
+		}
+	}
+}
+## Создание отдельных клиентов и файлов cookie
+// Создание отдельных клиентов и файлов cookie
+func main() {
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
 
+	jar, err := cookiejar.New(nil)
 
+	clients := make([]http.Client, 3)
+	for index, client := range clients {
+
+		//jar, err := cookiejar.New(nil)
+
+		if err == nil {
+			client.Jar = jar
+		}
+		for i := 0; i < 3; i++ {
+			req, err := http.NewRequest(http.MethodGet,
+				"http://localhost:5000/cookie", nil)
+			if err == nil {
+				response, err := client.Do(req)
+				if err == nil && response.StatusCode == http.StatusOK {
+					fmt.Fprintf(os.Stdout, "Client %v: ", index)
+					io.Copy(os.Stdout, response.Body)
+					defer response.Body.Close()
+				} else {
+					Printfln("Request Error: %v", err.Error())
+				}
+			} else {
+				Printfln("Request Init Error: %v", err.Error())
+			}
+		}
+	}
+}
+## Управление перенаправлениями
+// Управление перенаправлениями
+func main() {
+	go http.ListenAndServe(":5000", nil)
+	time.Sleep(time.Second)
+
+	http.DefaultClient.CheckRedirect = func(req *http.Request,
+		previous []*http.Request) error {
+		if len(previous) == 3 {
+			url, _ := url.Parse("http://localhost:5000/html")
+			req.URL = url
+		}
+		return nil
+	}
+
+	req, err := http.NewRequest(http.MethodGet,
+		"http://localhost:5000/redirect1", nil)
+	if err == nil {
+		var response *http.Response
+		response, err = http.DefaultClient.Do(req)
+		if err == nil {
+			io.Copy(os.Stdout, response.Body)
+		} else {
+			Printfln("Request Error: %v", err.Error())
+		}
+	} else {
+		Printfln("Error: %v", err.Error())
+	}
+}
+## Создание составных форм
+### Функция конструктора multipart.Writer
+NewWriter(writer)
+Эта функция создает новый multipart.Writer, который записывает данные формы в указанный io.Writer.
+**Методы multipart.Writer**
+CreateFormField(fieldname)
+Этот метод создает новое поле формы с указанным именем. Результатом является io.Writer, который используется для записи данных поля, и error, сообщающая о проблемах с созданием поля.
+CreateFormFile(fieldname, filename)
+Этот метод создает новое поле файла с указанным именем поля и именем файла. Результатом является io.Writer, который используется для записи данных поля, и error, сообщающая о проблемах с созданием поля.
+FormDataContentType()
+Этот метод возвращает строку, которая используется для установки заголовка запроса Content-Type и включает строку, обозначающую границы между частями формы.
+Close()
+Эта функция завершает форму и записывает конечную границу, обозначающую конец данных формы.
+### 
+Смотри в проэкте последнюю main
+# 26 Работа с базами данных (sqlLite)
+## Драйверы и пакеты
+https://github.com/golang/go/wiki/sqldrivers. - драйверы для разных баз данных
+
+SQLite - database/sql
+# 27,28,29 (пропустил) Использование рефлексии
+## Example 1 printDetails(values ...interface{}) and switch val := elem.(type)
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+type Product struct {
+	Name, Category string
+	Price          float64
+}
+type Customer struct {
+	Name, City string
+}
+
+func printDetails(values ...interface{}) {
+	for _, elem := range values {
+		switch val := elem.(type) {
+		case Product:
+			Printfln("Product: Name: %v, Category: %v, Price: %v",
+				val.Name, val.Category, val.Price)
+		case Customer:
+			Printfln("Customer: Name: %v, City: %v", val.Name, val.City)
+		}
+	}
+}
+
+func main() {
+	product := Product{
+		Name: "Kayak", Category: "Watersports", Price: 279,
+	}
+	customer := Customer{Name: "Alice", City: "New York"}
+	printDetails(product, customer)
+}
+## Theory TypeOf(val) and ValueOf(val) reflect
+TypeOf(val)
+Эта функция возвращает значение, реализующее интерфейс Type, описывающий тип указанного значения.
+ValueOf(val)
+Эта функция возвращает структуру Value, которая позволяет проверять указанное значение и управлять им.
+### Example 2 
+type Product struct {
+	Name, Category string
+	Price          float64
+}
+type Customer struct {
+	Name, City string
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+func printDetails(values ...interface{}) {
+	for _, elem := range values {
+		fieldDetails := []string{}
+		elemType := reflect.TypeOf(elem)
+		elemValue := reflect.ValueOf(elem)
+		if elemType.Kind() == reflect.Struct {
+			for i := 0; i < elemType.NumField(); i++ {
+				fieldName := elemType.Field(i).Name
+				fieldVal := elemValue.Field(i)
+				fieldDetails = append(fieldDetails,
+					fmt.Sprintf("%v: %v", fieldName, fieldVal))
+			}
+			Printfln("%v: %v", elemType.Name(), strings.Join(fieldDetails, ", "))
+		} else {
+			Printfln("%v: %v", elemType.Name(), elemValue)
+		}
+	}
+}
+
+type Payment struct {
+	Currency string
+	Amount   float64
+}
+
+func main() {
+	product := Product{
+		Name: "Kayak", Category: "Watersports", Price: 279,
+	}
+	customer := Customer{Name: "Alice", City: "New York"}
+	payment := Payment{Currency: "USD", Amount: 100.50}
+	printDetails(product, customer, payment, 10, true)
+}
+## Использование основных функций типа reflect
+Name()
+Этот метод возвращает имя типа.
+PkgPath()
+Этот метод возвращает путь пакета для типа. Пустая строка возвращается для встроенных типов, таких как int и bool.
+Kind()
+Этот метод возвращает вид типа, используя значение, которое соответствует одному из постоянных значений, определенных пакетом reflect, как описано в таблице 27-5.
+String()
+Этот метод возвращает строковое представление имени типа, включая имя пакета.
+Comparable()
+Этот метод возвращает значение true, если значения этого типа можно сравнить с помощью стандартного оператора сравнения, как описано в разделе «Сравнение значений».
+AssignableTo(type)
+Этот метод возвращает значение true, если значения этого типа могут быть присвоены переменным или полям указанного отраженного типа.
+**Kind константы**
+Bool
+Это значение обозначает bool значение
+Int, Int8, Int16, Int32, Int64
+Эти значения обозначают различные размеры целочисленных типов
+Uint, Uint8, Uint16, Uint32, Uint64
+Эти значения обозначают различные размеры целочисленных типов без знака
+Float32, Float64
+Эти значения обозначают различные размеры типов с плавающей запятой
+String
+Это значение обозначает строку
+Struct
+Это значение обозначает структуру
+Array
+Это значение обозначает массив
+Slice
+Это значение обозначает срез
+Map
+Это значение обозначает карту
+Chan
+Это значение обозначает канал
+Func
+Это значение определяет функцию
+Interface
+Это значение обозначает интерфейс
+Ptr
+Это значение обозначает указатель
+Uintptr
+Это значение обозначает небезопасный указатель, который не описан в этой книге
+### Example
+type Product struct {
+	Name, Category string
+	Price          float64
+}
+type Customer struct {
+	Name, City string
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+func getTypePath(t reflect.Type) (path string) {
+	path = t.PkgPath()
+	if path == "" {
+		path = "(built-in)"
+	}
+	return
+}
+
+func printDetails(values ...interface{}) {
+	for _, elem := range values {
+		elemType := reflect.TypeOf(elem)
+		Printfln("Name: %v, PkgPath: %v, Kind: %v",
+			elemType.Name(), getTypePath(elemType), elemType.Kind())
+	}
+}
+
+type Payment struct {
+	Currency string
+	Amount   float64
+}
+
+func main() {
+	product := Product{
+		Name: "Kayak", Category: "Watersports", Price: 279,
+	}
+	customer := Customer{Name: "Alice", City: "New York"}
+	payment := Payment{Currency: "USD", Amount: 100.50}
+	printDetails(product, customer, payment, 10, true)
+}
+## Использование базовых возможностей Value
+### Theory
+Kind()
+Этот метод возвращает вид типа значения, используя одно из значений из таблицы 27-5.
+Type()
+Этот метод возвращает Type для Value.
+IsNil()
+Этот метод возвращает true, если значение равно нулю. Этот метод вызовет панику, если базовое значение не является функцией, интерфейсом, указателем, срезом или каналом.
+IsZero()
+Этот метод возвращает значение true, если базовое значение является нулевым значением для своего типа.
+Bool()
+Этот метод возвращает базовое bool значение. Метод вызывает панику, если Kind базового значения не является Bool.
+Bytes()
+Этот метод возвращает базовое значение []byte. Метод вызывает панику, если базовое значение не является байтовым срезом. Я демонстрирую, как определить тип слайса в разделе «Идентификация байтовых срезов».
+Int()
+Этот метод возвращает базовое значение в виде int64. Метод вызывает панику, если Kind базового значения не является Int, Int8, Int16, Int32 или Int64.
+Uint()
+Этот метод возвращает базовое значение в виде uint64. Метод вызывает панику, если Kind базового значения не является Uint, Uint8, Uint16, Uint32 или Uint64.
+Float()
+Этот метод возвращает базовое значение в виде float64. Метод вызывает панику, если Kind базового значения не равен Float32 или Float64.
+String()
+Этот метод возвращает базовое значение в виде строки, если значение Kind — String. Для других значений Kind этот метод возвращает строку <T Value>, где T — базовый тип, например <int Value>.
+Elem()
+Этот метод возвращает Value, на которое указывает указатель. Этот метод также можно использовать с интерфейсами, как описано в главе 29. Этот метод вызывает панику, если Kind базового значения не равен Ptr.
+IsValid()
+Этот метод возвращает false, если Value является нулевым значением, созданным как Value{}, а не полученным, например, с помощью ValueOf. Этот метод не относится к отраженным значениям, которые являются нулевым значением их отраженного типа. Если этот метод возвращает false, то все остальные методы Value будут паниковать.
+### Example
+type Product struct {
+	Name, Category string
+	Price          float64
+}
+type Customer struct {
+	Name, City string
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+
+func getTypePath(t reflect.Type) (path string) {
+	path = t.PkgPath()
+	if path == "" {
+		path = "(built-in)"
+	}
+	return
+}
+
+func printDetails(values ...interface{}) {
+	for _, elem := range values {
+		elemValue := reflect.ValueOf(elem)
+		switch elemValue.Kind() {
+		case reflect.Bool:
+			var val bool = elemValue.Bool()
+			Printfln("Bool: %v", val)
+		case reflect.Int:
+			var val int64 = elemValue.Int()
+			Printfln("Int: %v", val)
+		case reflect.Float32, reflect.Float64:
+			var val float64 = elemValue.Float()
+			Printfln("Float: %v", val)
+		case reflect.String:
+			var val string = elemValue.String()
+			Printfln("String: %v", val)
+		case reflect.Ptr:
+			var val reflect.Value = elemValue.Elem()
+			if val.Kind() == reflect.Int {
+				Printfln("Pointer to Int: %v", val.Int())
+			}
+		default:
+			Printfln("Other: %v", elemValue.String())
+		}
+	}
+}
+
+type Payment struct {
+	Currency string
+	Amount   float64
+}
+
+func main() {
+	product := Product{
+		Name: "Kayak", Category: "Watersports", Price: 279,
+	}
+	number := 100
+	printDetails(true, 10, 23.30, "Alice", &number, product)
+}
+# 30 Координация горутин WaitGroup, Mutex, sync, 
+## WaitGroup
+### Theory WaitGroup
+Add(num)
+Этот метод увеличивает количество горутин, которые ожидает WaitGroup, на указанное int.
+Done()
+Этот метод уменьшает количество горутин, которые ожидает WaitGroup, на одну.
+Wait()
+Этот метод блокируется до тех пор, пока метод Done не будет вызван один раз для общего числа горутин, указанного вызовами метода Add.
+### Example 1
+var waitGroup = sync.WaitGroup{}
+
+func doSum(count int, val *int) {
+	for i := 0; i < count; i++ {
+		*val++
+	}
+	waitGroup.Done()
+}
+func main() {
+	counter := 0
+	waitGroup.Add(1)
+	go doSum(5000, &counter)
+	waitGroup.Wait()
+	Printfln("Total: %v", counter)
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+### Example 2
+func doSum(count int, val *int, wg *sync.WaitGroup) {
+	for i := 0; i < count; i++ {
+		*val++
+	}
+	wg.Done()
+}
+func main() {
+	var waitGroup = sync.WaitGroup{}
+	counter := 0
+	waitGroup.Add(1)
+	go doSum(5000, &counter, &waitGroup)
+	waitGroup.Wait()
+	Printfln("Total: %v", counter)
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Mutex
+### Theory
+Lock()
+Этот метод блокирует Mutex. Если Mutex уже заблокирован, этот метод блокируется до тех пор, пока он не будет разблокирован.
+Unlock()
+Этот метод разблокирует Mutex.
+RLock()
+Этот метод пытается получить блокировку чтения и будет блокироваться до тех пор, пока она не будет получена.
+RUnlock()
+Этот метод снимает блокировку чтения.
+Lock()
+Этот метод пытается получить блокировку записи и будет блокироваться, пока она не будет получена.
+Unlock()
+Этот метод снимает блокировку записи.
+RLocker()
+Этот метод возвращает указатель на Locker для получения и снятия блокировки чтения, как описано в разделе «Использование условий для координации горутин».
+### Example
+var waitGroup = sync.WaitGroup{}
+var mutex = sync.Mutex{}
+
+func doSum(count int, val *int) {
+	time.Sleep(time.Second)
+	for i := 0; i < count; i++ {
+		mutex.Lock()
+		*val++
+		mutex.Unlock()
+	}
+	waitGroup.Done()
+}
+func main() {
+
+	counter := 0
+	numRoutines := 3
+	waitGroup.Add(numRoutines)
+	for i := 0; i < numRoutines; i++ {
+		go doSum(5000, &counter)
+	}
+	waitGroup.Wait()
+	Printfln("Total: %v", counter)
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+### Example 2
+var waitGroup = sync.WaitGroup{}
+var mutex = sync.Mutex{}
+
+func doSum(count int, val *int) {
+	time.Sleep(time.Second)
+	mutex.Lock()
+	for i := 0; i < count; i++ {
+		*val++
+	}
+	mutex.Unlock()
+	waitGroup.Done()
+}
+func main() {
+
+	counter := 0
+	numRoutines := 3
+	waitGroup.Add(numRoutines)
+	for i := 0; i < numRoutines; i++ {
+		go doSum(5000, &counter)
+	}
+	waitGroup.Wait()
+	Printfln("Total: %v", counter)
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+### Example RWMutex
+var waitGroup = sync.WaitGroup{}
+var rwmutex = sync.RWMutex{}
+var squares = map[int]int{}
+
+func calculateSquares(max, iterations int) {
+	for i := 0; i < iterations; i++ {
+		val := rand.Intn(max)
+		rwmutex.RLock()
+		square, ok := squares[val]
+		rwmutex.RUnlock()
+		if ok {
+			Printfln("Cached value: %v = %v", val, square)
+		} else {
+			rwmutex.Lock()
+			if _, ok := squares[val]; !ok {
+				squares[val] = int(math.Pow(float64(val), 2))
+				Printfln("Added value: %v = %v", val, squares[val])
+			}
+			rwmutex.Unlock()
+		}
+	}
+	waitGroup.Done()
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	//counter := 0
+	numRoutines := 3
+	waitGroup.Add(numRoutines)
+	for i := 0; i < numRoutines; i++ {
+		go calculateSquares(10, 5)
+	}
+	waitGroup.Wait()
+	Printfln("Cached values: %v", len(squares))
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Использование условий для координации горутин sync
+### Theory
+NewCond(*locker)
+Эта функция создает Cond, используя указатель на указанный Locker.
+Lock()
+Этот метод получает блокировку, управляемую Locker.
+Unlock()
+Этот метод снимает блокировку, управляемую Locker.
+L
+Это поле возвращает Locker, который был передан функции NewCond и используется для получения блокировки.
+Wait()
+Этот метод снимает блокировку и приостанавливает горутину.
+Signal()
+Этот метод пробуждает одну ожидающую горутину.
+Broadcast()
+Этот метод пробуждает все ожидающие горутины.
+### Example
+var waitGroup = sync.WaitGroup{}
+var rwmutex = sync.RWMutex{}
+var readyCond = sync.NewCond(rwmutex.RLocker())
+
+var squares = map[int]int{}
+
+func generateSquares(max int) {
+	rwmutex.Lock()
+	Printfln("Generating data...")
+	for val := 0; val < max; val++ {
+		squares[val] = int(math.Pow(float64(val), 2))
+	}
+	rwmutex.Unlock()
+	Printfln("Broadcasting condition")
+	readyCond.Broadcast()
+	waitGroup.Done()
+}
+func readSquares(id, max, iterations int) {
+	readyCond.L.Lock()
+	for len(squares) == 0 {
+		readyCond.Wait()
+	}
+	for i := 0; i < iterations; i++ {
+		key := rand.Intn(max)
+		Printfln("#%v Read value: %v = %v", id, key, squares[key])
+		time.Sleep(time.Millisecond * 100)
+	}
+	readyCond.L.Unlock()
+	waitGroup.Done()
+}
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	numRoutines := 2
+	waitGroup.Add(numRoutines)
+	for i := 0; i < numRoutines; i++ {
+		go readSquares(i, 10, 5)
+	}
+	waitGroup.Add(1)
+	go generateSquares(10)
+	waitGroup.Wait()
+	Printfln("Cached values: %v", len(squares))
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Обеспечение однократного выполнения функции once.Do(func(){})
+### Theory
+Do(func)
+Этот метод выполняет указанную функцию, но только если она еще не была выполнена.
+### Example
+var waitGroup = sync.WaitGroup{}
+var once = sync.Once{}
+var squares = map[int]int{}
+
+func generateSquares(max int) {
+	Printfln("Generating data...")
+	for val := 0; val < max; val++ {
+		squares[val] = int(math.Pow(float64(val), 2))
+	}
+}
+func readSquares(id, max, iterations int) {
+	once.Do(func() {
+		generateSquares(max)
+	})
+	for i := 0; i < iterations; i++ {
+		key := rand.Intn(max)
+		Printfln("#%v Read value: %v = %v", id, key, squares[key])
+		time.Sleep(time.Millisecond * 100)
+	}
+	waitGroup.Done()
+}
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	numRoutines := 2
+	waitGroup.Add(numRoutines)
+	for i := 0; i < numRoutines; i++ {
+		go readSquares(i, 10, 5)
+	}
+	waitGroup.Wait()
+	Printfln("Cached values: %v", len(squares))
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Использование контекстов wg.Done()...
+### Theory
+Value(key)
+Этот метод возвращает значение, связанное с указанным ключом.
+Done()
+Этот метод возвращает канал, который можно использовать для получения уведомления об отмене.
+Deadline()
+Этот метод возвращает time.Time, представляющий крайний срок для запроса, и логическое значение, которое будет false, если крайний срок не указан.
+Err()
+Этот метод возвращает error, указывающую, почему канал Done получил сигнал. Пакет context определяет две переменные, которые можно использовать для сравнения ошибок: Canceled указывает, что запрос был отменен, а DeadlineExeeded указывает, что срок истек.
+Background()
+Этот метод возвращает Context по умолчанию, из которого получаются другие контексты.
+WithCancel(ctx)
+Этот метод возвращает контекст и функцию отмены, как описано в разделе «Отмена запроса».
+WithDeadline(ctx, time)
+Этот метод возвращает контекст с крайним сроком, который выражается с помощью значения time.Time, как описано в разделе «Установка крайнего срока».
+WithTimeout(ctx, duration)
+Этот метод возвращает контекст с крайним сроком, который выражается с помощью значения time.Duration, как описано в разделе «Установка крайнего срока».
+WithValue(ctx, key, val)
+Этот метод возвращает контекст, содержащий указанную пару ключ-значение, как описано в разделе «Предоставление данных запроса».
+### Example
+func processRequest(wg *sync.WaitGroup, count int) {
+	total := 0
+	for i := 0; i < count; i++ {
+		Printfln("Processing request: %v", total)
+		total++
+		time.Sleep(time.Millisecond * 250)
+	}
+	Printfln("Request processed...%v", total)
+	wg.Done()
+}
+func main() {
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(1)
+	Printfln("Request dispatched...")
+	go processRequest(&waitGroup, 10)
+	waitGroup.Wait()
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+### Example Отмена запроса
+func processRequest(ctx context.Context, wg *sync.WaitGroup, count int) {
+	total := 0
+	for i := 0; i < count; i++ {
+		select {
+		case <-ctx.Done():
+			Printfln("Stopping processing - request cancelled")
+			goto end
+		default:
+			Printfln("Processing request: %v", total)
+			total++
+			time.Sleep(time.Millisecond * 250)
+		}
+	}
+	Printfln("Request processed...%v", total)
+end:
+	wg.Done()
+}
+func main() {
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(1)
+	Printfln("Request dispatched...")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go processRequest(ctx, &waitGroup, 10)
+	time.Sleep(time.Second)
+	Printfln("Canceling request")
+	cancel()
+	waitGroup.Wait()
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Установка крайнего срока ctx, _ := context.WithTimeout(context.Background(), time.Second*2)
+func processRequest(ctx context.Context, wg *sync.WaitGroup, count int) {
+	total := 0
+	for i := 0; i < count; i++ {
+		select {
+		case <-ctx.Done():
+			if ctx.Err() == context.Canceled {
+				Printfln("Stopping processing - request cancelled")
+			} else {
+				Printfln("Stopping processing - deadline reached")
+			}
+			goto end
+		default:
+			Printfln("Processing request: %v", total)
+			total++
+			time.Sleep(time.Millisecond * 250)
+		}
+	}
+	Printfln("Request processed...%v", total)
+end:
+	wg.Done()
+}
+func main() {
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(1)
+	Printfln("Request dispatched...")
+
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*2)
+	go processRequest(ctx, &waitGroup, 10)
+	waitGroup.Wait()
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+## Предоставление данных запроса ctx = context.WithValue(ctx, countKey, 4)
+const (
+	countKey = iota
+	sleepPeriodKey
+)
+
+// func processRequest(ctx context.Context, wg *sync.WaitGroup, count int) {
+func processRequest(ctx context.Context, wg *sync.WaitGroup) {
+	total := 0
+	count := ctx.Value(countKey).(int)
+	sleepPeriod := ctx.Value(sleepPeriodKey).(time.Duration)
+	for i := 0; i < count; i++ {
+		select {
+		case <-ctx.Done():
+			if ctx.Err() == context.Canceled {
+				Printfln("Stopping processing - request cancelled")
+			} else {
+				Printfln("Stopping processing - deadline reached")
+			}
+			goto end
+		default:
+			Printfln("Processing request: %v", total)
+			total++
+			time.Sleep(sleepPeriod)
+		}
+	}
+	Printfln("Request processed...%v", total)
+end:
+	wg.Done()
+}
+func main() {
+	waitGroup := sync.WaitGroup{}
+	waitGroup.Add(1)
+	Printfln("Request dispatched...")
+
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*2)
+	ctx = context.WithValue(ctx, countKey, 4)
+	ctx = context.WithValue(ctx, sleepPeriodKey, time.Millisecond*250)
+	go processRequest(ctx, &waitGroup)
+	waitGroup.Wait()
+}
+
+func Printfln(template string, values ...interface{}) {
+	fmt.Printf(template+"\n", values...)
+}
+# 
 
 
 

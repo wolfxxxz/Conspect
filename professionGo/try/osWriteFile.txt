@@ -1,4 +1,0 @@
-I'm osWriteFile
-Hello
-my name is orange
-My name is Two
