@@ -266,8 +266,99 @@ wolfxxxz/ubuntu_slovarnv   latest    e6bca9f7eac9   5 hours ago   366MB
 4: push image
 docker push wolfxxxz/ubuntu_slovarnv
 https://hub.docker.com/repositories/wolfxxxz
-# test
-## 1 
+#
+
+# Запуск сервера локально через докер
+## Так не работает
+sudo docker run -it --mount type=bind,src=/home/mvmir/docker_dir_for_bind,target=/bind/ ubuntu bash
+
+src=/home/mvmir/docker_dir_for_bind - папка на компе
+target=/bind/ - папка на контейнере
+## -p Порты
+sudo docker run -it --mount type=bind,src=/home/mvmir/docker_dir_for_bind,target=/bind/ -p 8081:8081 ubuntu bash
+### 
+docker container run -it -p 8081:8081 ubuntu_dict bash
+cd Dictionary
+./Dictionary
+# Dockerfile Dictionary
+## Dockerfile
+```
+# Используем базовый образ Ubuntu
+FROM ubuntu
+
+# Устанавливаем необходимые зависимости
+# Качаем необходимый софт
+# apt-get install -y gcc // компилятор GNU C (GCC) (набор компиляторов)
+# && apt-get install -y build-essential // GCC + make + ...
+RUN apt-get update && apt-get install -y gcc && apt-get install make 
+
+# Копируем файлы проекта внутрь контейнера
+# Создаём папку Dictionary в контейнере и копируем туда все файлы
+COPY . /Dictionary
+
+# Устанавливаем рабочую директорию
+WORKDIR /Dictionary
+
+# Компилируем и запускаем программу
+# RUN gcc -o Dictionary Dictionary.c
+# Если запустить контейнер с открытием bash то последняя команда не будет выполнена
+CMD ["./Dictionary"]
+
+```
+## bash Makefile
+Makefile
+runPort:
+	./Dictionary -port=:8083
+runDefault:
+	./Dictionary
+runEnv:
+	./Dictionary -port=.env
+builddocker:
+	docker build -t wolfxxxz/dictionary_app .
+rundocker:
+	docker run -it -p 8081:8081 wolfxxxz/dictionary_app
+rundockerBash:
+	docker run -it -p 8081:8081 wolfxxxz/dictionary_app bash
+# Dockerfile psgsql
+## Dockerfile
+```
+FROM postgres:latest
+
+# Устанавливаем пароль для пользователя "postgres"
+ENV POSTGRES_PASSWORD=mysecretpassword
+
+# Копируем файлы миграции в контейнер
+COPY ./migration.sql /docker-entrypoint-initdb.d/
+
+# Открываем порт для доступа к PostgreSQL
+EXPOSE 5432
+
+# Запускаем PostgreSQL при старте контейнера
+CMD ["postgres"]
+```
+## migration.sql
+-- Создаем таблицу
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
+);
+
+-- Добавляем данные в таблицу
+INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
+## makefile
+dockerBuild:
+    docker build -t postgresql-container .
+dockerRun:
+    docker run -d -p 5435:5432 --name postgresql-app postgresql-container
+dockerMigration:
+    \i /docker-entrypoint-initdb.d/migration.sql
+bashCheckPort:
+    sudo netstat -tuln | grep 5435
+dockerExec:
+    docker container exec <container> <command>
+
+#
 
 
 
@@ -284,7 +375,8 @@ https://hub.docker.com/repositories/wolfxxxz
 
 
 
-# Пропали заметки
+
+# заметки
 2: Настроить нужный софт (в нашем случае vim)
 apt-get update
 apt-get install apt-file

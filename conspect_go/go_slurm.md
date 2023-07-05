@@ -2667,13 +2667,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
-/*.env
+/*configs/.env
 app_port = 8080
 path = get/go/next
 */
 
 func GetEnv() {
-	err := godotenv.Load()
+	err := godotenv.Load("configs/.env")
 	if err != nil {
 		log.Fatal("Could not find .env file:", err)
 	}

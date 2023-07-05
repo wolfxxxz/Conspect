@@ -1,6 +1,0 @@
-[web-server]
-bind_addr = ":8080"
-logger_level = "debug"
-
-[storage]
-database_url = "host=localhost port=5433 user=postgres password=1 dbname=restapi sslmode=disable"
