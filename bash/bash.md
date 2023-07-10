@@ -661,6 +661,19 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOBJCn775RhckiyQs6MRWqYMg5SSf4BqjhpmZGFbEo8
 ### docker run -d -p 2022:22 ubuntu-ssh
 # 5 bash scripting
 ## 27 bash script (.sh) или без разширения (best practice)
+### Example 1
+//script.sh
+#!/bin/bash
+#!cd ~"Рабочий стол" <- так не работает
+cd ~/Рабочий\ стол
+code Dictionary 
+code git_Conspect 
+cd docker 
+code psqlBasic
+#### chmod +x <file.sh> сделать исполняемым (доступен с любого места)
+chmod +x script.sh
+#### запуск 
+./script.sh
 ### first script
 touch start-app
 nano start-app

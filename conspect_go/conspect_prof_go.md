@@ -766,6 +766,26 @@ func main() {
 	productsByCategory["meat"] = append(productsByCategory["meat"], "lamb")
 	fmt.Println(productsByCategory["meat"]) // Выведет [beef pork chicken lamb]
 }
+### Map and stringVar
+var maps = make(map[string]string, 5) //map[string]string - так нельзя
+
+func main() {
+	maps["Привет"] = "Привет дефолт значение"
+	maps["first"] = "the most first value"
+	maps["second"] = "the second most value"
+
+	var defaultVal = "Привет"
+	// Определение флагов с дефолтными значениями
+	aPtr := flag.String("a", defaultVal, "Значение флага 'a'")
+
+	// Парсинг флагов командной строки
+	flag.Parse()
+
+	// Вывод значений флагов
+	fmt.Println("Значение флага 'a':", *aPtr)
+	fmt.Println(maps[*aPtr])
+	// ./flag1 -a=true
+}
 ### String = []rune(string) => string([]rune) - Круговорот стринг в байт и ...
 func main() {
 	var wordString = "Бибизянка Dusja"
@@ -5866,6 +5886,49 @@ Close()
 ### 
 Смотри в проэкте последнюю main
 # 26 Работа с базами данных (sqlLite)
+## PlaceHolders database/sql github.com/lib/pq
+### Example
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "github.com/lib/pq"
+)
+
+type User struct {
+	ID       int
+	Username string
+	Email    string
+}
+
+func main() {
+	db, err := sql.Open("postgres", "postgres://user:password@localhost/mydb?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Создание пользователя с использованием плейсхолдеров
+	stmt, err := db.Prepare("INSERT INTO users (username, email) VALUES ($1, $2) RETURNING id")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	username := "john_doe"
+	email := "john.doe@example.com"
+	var user *User
+	user.Username = username
+	user.Email = email
+
+	err = stmt.QueryRow(user.Username, user.Email).Scan(&user.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Created user with ID:", user.ID)
+}
 ## Драйверы и пакеты
 https://github.com/golang/go/wiki/sqldrivers. - драйверы для разных баз данных
 

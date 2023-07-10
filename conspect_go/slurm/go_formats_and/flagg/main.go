@@ -46,6 +46,7 @@ goFlag2:
 	./flag2.exe
 goFlag2PlusString:
 	./flag2.exe -a=hello
+	
 #### flag StringVar
 func main() {
 	var variable string //переменная принимает значение

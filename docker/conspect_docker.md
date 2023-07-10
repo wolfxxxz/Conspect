@@ -319,7 +319,7 @@ rundocker:
 	docker run -it -p 8081:8081 wolfxxxz/dictionary_app
 rundockerBash:
 	docker run -it -p 8081:8081 wolfxxxz/dictionary_app bash
-# Dockerfile psgsql
+# Dockerfile psgsql failure (тут всё висит и нельзя закрыть контейнер)
 ## Dockerfile
 ```
 FROM postgres:latest
@@ -351,14 +351,63 @@ dockerBuild:
     docker build -t postgresql-container .
 dockerRun:
     docker run -d -p 5435:5432 --name postgresql-app postgresql-container
-dockerMigration:
+dockerMigration://тут всё висит и нельзя закрыть контейнер
     \i /docker-entrypoint-initdb.d/migration.sql
 bashCheckPort:
     sudo netstat -tuln | grep 5435
 dockerExec:
     docker container exec <container> <command>
+# Dockerfile psql
+## Dockerfile
+FROM postgres:latest
+EXPOSE 5432
+## Makefile
+dockerBuild:
+    docker build -t my-postgres-image .
+bashCheckPort:
+    sudo netstat -tuln | grep 5435
+dockerRun:
+    docker run --name my-postgres-container -e POSTGRES_PASSWORD=1 -p 5435:5432 -d my-postgres-image
+dockerLs:
+    docker container ls -a
+dockerSudo: //внести пользователя в список админ докера
+    sudo usermod -aG docker $USER
+    sudo usermod -aG kvm $USER
 
-#
+## Instal postgresql-client
+Makefile
+updateUbuntu:
+    sudo apt-get update
+instalPsql:
+    sudo apt-get install postgresql-client
+instalPqAdmin:
+    sudo apt-get install pgadmin4
+psqlLocalhost:
+    psql -h localhost -p 5432 -U postgres
+## Настройка PgAdmin4 ubuntu
+521647f03130   my-postgres-image   "docker-entrypoint.s…"   23 seconds ago   Up 21 seconds   0.0.0.0:5435->5432/tcp, :::5435->5432/tcp   my-postgres-container
+можешь конкретно пример показывать на этих данных
+ChatGPT
+Исходя из информации, которую вы предоставили, у вас есть контейнер с идентификатором 521647f03130 и именем my-postgres-container, основанный на образе my-postgres-image. Контейнер пробрасывает порт 5432 в контейнере на порт 5435 хоста.
+
+Чтобы подключиться к базе данных PostgreSQL внутри этого контейнера с помощью pgAdmin, выполните следующие шаги:
+
+Запустите pgAdmin на вашем компьютере.
+
+Щелкните правой кнопкой мыши на "Servers" (Серверы) в панели навигации слева и выберите "Create" (Создать) -> "Server" (Сервер).
+
+В окне "Create - Server" (Создать - Сервер) вкладка "General" (Общее), укажите имя сервера в поле "Name" (Имя).
+
+Перейдите на вкладку "Connection" (Подключение) и введите следующую информацию:
+
+Host name/address (Имя хоста/адрес): localhost
+Port (Порт): 5435
+Maintenance database (Обслуживаемая база данных): Имя базы данных, к которой вы хотите подключиться.
+Username (Имя пользователя): Имя пользователя для доступа к базе данных.
+Password (Пароль): Пароль пользователя для доступа к базе данных.
+Нажмите кнопку "Save" (Сохранить) для создания сервера.
+##
+
 
 
 

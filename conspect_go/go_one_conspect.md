@@ -560,7 +560,17 @@ func main() {
 		fmt.Println()
 	}
 	fmt.Println("По идее выше треугольник")
-
+### goto target (Цикл по метке)
+func main() {
+	counter := 0
+target:
+	fmt.Println("Counter", counter)
+	counter++
+	if counter < 5 {
+		goto target
+	}
+	fmt.Println("Over")
+}
 ### Лейблы - это синтаксический сахар. Иногда бывает плохо. С лейблами по лучше. 
 outer:
 	for i := 0; i <= 2; i++ {
