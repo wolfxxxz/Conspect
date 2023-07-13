@@ -1,0 +1,120 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+type ElemType interface{}
+
+// Узел
+type Node struct {
+	Data ElemType
+	Next *Node
+}
+
+// Связанный список
+type LinkedList struct {
+	Head *Node // Головной узел
+}
+
+func CreateLinkedList() *LinkedList {
+	head := new(Node)
+	return &LinkedList{head}
+}
+
+// Получаем значение i-го узла
+func (list *LinkedList) GetELem(i int) (ElemType, bool) {
+	j := 1
+	p := list.Head.Next     // Первый узел
+	for p != nil && j < i { // Когда p не равно nil или j не равно i, цикл продолжается
+		p = p.Next
+		j++
+	}
+	if p == nil || j > i {
+		return nil, false // i-й узел не существует
+	}
+
+	return p.Data, true
+}
+
+// Вставляем элемент перед i-й позицией
+func (list *LinkedList) Insert(i int, x ElemType) bool {
+	j := 1
+	p := list.Head          // 0-й узел
+	for p != nil && j < i { // Находим i-1-й узел
+		p = p.Next
+		j++
+	}
+	if p == nil || j > i {
+		return false // i-1-й узел не существует, значит i-й узел тоже не существует
+	}
+	s := &Node{x, p.Next}
+	p.Next = s
+
+	return true
+}
+
+// Удаляем i-й узел
+func (list *LinkedList) Delete(i int) (ElemType, bool) {
+	j := 1
+	p := list.Head
+	for p.Next != nil && j < i { // Находим i-1-й узел
+		p = p.Next
+		j++
+	}
+	if p.Next == nil || j > i {
+		return nil, false // i-й узел не существует
+	}
+	q := p.Next
+	p.Next = q.Next
+
+	return p.Data, true
+}
+
+// Определяем, пуст ли связанный список
+func (list *LinkedList) IsEmpty() bool {
+	return list.Head.Next == nil
+}
+
+// Длина списка ссылок
+func (list *LinkedList) Len() int {
+	length := 0
+	p := list.Head.Next
+	for p != nil {
+		p = p.Next
+		length++
+	}
+
+	return length
+}
+
+// Распечатать связанный список
+func (list *LinkedList) Print() error {
+	if list.IsEmpty() {
+		return errors.New("this is an empty linked list")
+	}
+	p := list.Head.Next
+	for p != nil {
+		fmt.Printf("%v  ", p.Data)
+		p = p.Next
+	}
+	fmt.Println()
+	return nil
+}
+
+func main() {
+	list := CreateLinkedList()
+	s := []int{1, 2, 3, 4, 5, 6, 7}
+	for i, v := range s {
+		list.Insert(i+1, v)
+	}
+	list.Print()
+	ok := list.Insert(2, 99)
+	if !ok {
+		fmt.Println("insert fail")
+	}
+	list.Print()
+	fmt.Println(list.Len())
+
+}

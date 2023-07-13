@@ -1,5 +1,6 @@
 At this point# docker for testUsers
-## 1 install docker on ubuntu and configure
+## 1 install docker and configure
+### install docker on ubuntu
 sudo apt-get update
 1:
 sudo apt install docker.io
@@ -17,6 +18,15 @@ sudo curl -L "https://github.com/docker/compose/releases/download/2.18.1/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 --и тут лажа
 docker-compose --version
+### install docker on windows
+https://www.docker.com/products/docker-desktop/
+download
+cmd docker -v
+2. check Hyper-V
+Windows Programm and components (control)
+Включение и отключение компонентов
+Hyper-V (on)
+Docker settings (Подключить все диски не получилось тк нет такой фичи в моей версии докера)
 ## 2 Commands simple container, image, volume --help
 docker -v - version docker
 docker --help

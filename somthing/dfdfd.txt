@@ -1,0 +1,8 @@
+Go та знання фреймворків Gin, Beego, Echo;
+Javascript та знання фрейморку Vue;
+HTML5 и CSS;
+досвід роботи з базами даних SQL, NoSQL, influxDB;
+досвід роботи з API;
+досвід використання Docker і Kubernetes;
+знання REST, HTTP и JSON;
+вміння писати тести;
